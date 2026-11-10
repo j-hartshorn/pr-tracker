@@ -2,7 +2,7 @@ import Hairline
 import SwiftUI
 import TrackerCore
 
-/// One line for the menu bar panel: status glyph, next step and title.
+/// One line for the menu bar panel: status glyph, next step, title, then number and repository.
 struct CompactPullRequestRow: View {
     let pullRequest: PullRequest
     let snapshot: Snapshot
@@ -17,7 +17,11 @@ struct CompactPullRequestRow: View {
                     .layoutPriority(1)
                 Text(pullRequest.title)
                     .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.inkMuted)
-                Spacer(minLength: 0)
+                Spacer(minLength: Space.s2)
+                Text("\(Text(verbatim: "#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(pullRequest.repository)")
+                    .textStyle(.label)
+                    .foregroundStyle(Palette.inkMuted)
+                    .layoutPriority(1)
             }
             .textStyle(.small)
             .lineLimit(1)
