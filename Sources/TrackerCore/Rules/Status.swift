@@ -33,4 +33,9 @@ extension Snapshot {
     public var mostUrgentStatus: Status {
         (authored + reviewRequested).map(status(of:)).min() ?? .waiting
     }
+
+    /// One status for each pull request that needs me, most urgent first.
+    public var statusesNeedingAttention: [Status] {
+        needingAttention.map(status(of:)).sorted()
+    }
 }

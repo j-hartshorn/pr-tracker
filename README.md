@@ -4,6 +4,7 @@ A macOS menu bar app that tracks the GitHub pull requests I'm involved with and 
 
 - **Notifies** when my review is requested by name, when someone reviews one of my pull requests, and when one of mine fails CI or gets a merge conflict.
 - **Menu bar**: a square glyph showing the most urgent status, with a dropdown of the pull requests that need something, one line each.
+- **Dock**: while the window is open, the three bars of the icon take the colours of the three most urgent pull requests that need me.
 - **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link, with a brief "Copied" toast.
 
 It polls GitHub every 60 seconds with the token from the `gh` CLI. It stores no credentials.
@@ -60,7 +61,7 @@ Each layer only knows about the ones below it.
 - **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift`. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
 - **The sections of the window**: `TrackerApp/Views/MainWindow.swift`.
 - **A row**: `Views/PullRequestRow.swift` in the window, `Views/CompactPullRequestRow.swift` in the menu panel. Both use `Views/PullRequestLink.swift` for click and right-click.
-- **The app icon**: `Support/AppIcon.svg`. `scripts/bundle.sh` makes the `.icns` from it.
+- **The app icon**: `Support/AppIcon.svg` for the bundle, and `scripts/bundle.sh` makes the `.icns` from it. `Hairline/AppIcon.swift` draws the same mark for the Dock, and `TrackerApp/DockPresence.swift` colours it. Change both drawings together.
 - **Colours, type and spacing**: `docs/design-system` first, then `Sources/Hairline`.
 
 ## Limits of building without Xcode

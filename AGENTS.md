@@ -60,7 +60,7 @@ Put a rule in `Rules` with a test, not in a view.
 
 - Use the tokens only: `Palette`, `Space`, `Stroke` and `TextStyle`. No other colours, sizes or radii.
 - Text is `ink` or `ink-muted`. `line-strong` is for disabled text, used here for parked drafts.
-- The three status colours go on status glyphs and nowhere else. The glyph's shape carries the meaning, and the colour repeats it.
+- The three status colours go on status glyphs and the bars of the Dock icon, and nowhere else. The glyph's shape carries the meaning, and the colour repeats it.
 - Sentence case. Short, plain words. Verbs on buttons.
 - Colours follow the system appearance: Paper in light, Dark in dark. Check both.
 

@@ -35,7 +35,7 @@ Rules:
 
 ## Status colours
 
-There are three status colours. They are the only colours apart from the accent, and they are for status glyphs only.
+There are three status colours. They are the only colours apart from the accent. They are for status glyphs, and for the bars of the app icon (see "App icon" below).
 
 | Token | Paper and Stark | Dark | Use |
 | --- | --- | --- | --- |
@@ -45,7 +45,7 @@ There are three status colours. They are the only colours apart from the accent,
 
 Rules:
 
-- A status colour goes on a status glyph, and nowhere else. Never on text, fills, borders or whole rows.
+- A status colour goes on a status glyph or a bar of the app icon, and nowhere else. Never on text, fills, borders or whole rows.
 - The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. It is never the only signal, because red and green are hard to tell apart for some people.
 - The text next to the glyph still says what the state is.
 - Something with no status has no colour. Most of the screen stays grey.
@@ -103,7 +103,9 @@ None yet. If you add icons: 1px stroke, square ends, 16px or 20px grid, in `ink`
 - It is drawn on a 1024 grid. The square is 480 wide with a 44 outline. Each bar is 262 by 44. Every gap, between bars and from a bar to the outline, is 65.
 - The tile is `bg` and the mark is `ink`, with nothing else on it.
 - The tile is 824 wide with rounded corners. This is the one exception to "corners are sharp": macOS gives every app icon this shape, and adds its own edge and shadow.
-- The icon in the app bundle (`Support/AppIcon.svg`) is Paper.
+- The icon in the app bundle (`Support/AppIcon.svg`) is Paper with `ink` bars. A bundle holds one image, so it cannot follow the system appearance.
+- While the app is in the Dock, the tile follows the system appearance, and each bar can take a status colour, the most urgent at the top. A bar with no status is `line-strong`.
+- A bar is too small to carry a glyph's shape, so on the icon colour is the only signal. The interface must still say each state with a glyph and text.
 
 ## Fonts
 

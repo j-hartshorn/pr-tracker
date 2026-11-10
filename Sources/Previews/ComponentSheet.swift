@@ -27,6 +27,14 @@ struct ComponentSheet: View {
                 Image(nsImage: Glyph.image(.solid, color: Palette.statusFailing, size: 18))
             }
             Rule()
+            HStack(spacing: Space.s3) {
+                AppIcon(bars: [], size: 64)
+                AppIcon(bars: [Palette.statusReady], size: 64)
+                AppIcon(bars: [Palette.statusFailing, Palette.statusAttention, Palette.statusReady], size: 64)
+                AppIcon(bars: [Palette.statusFailing, Palette.statusFailing, Palette.statusFailing], size: 64)
+            }
+            .background(Palette.line)
+            Rule()
             HStack(spacing: Space.s4) {
                 Toggle("Off", isOn: .constant(false))
                 Toggle("On", isOn: .constant(true))

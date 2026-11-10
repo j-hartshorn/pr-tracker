@@ -201,4 +201,14 @@ import Testing
         #expect(Snapshot.fixture(authored: [.fixture(2, reviewDecision: .approved)], reviewRequested: [theirs]).mostUrgentStatus == .attention)
         #expect(Snapshot.fixture(authored: [.fixture(1, checks: .failing)], reviewRequested: [theirs]).mostUrgentStatus == .failing)
     }
+
+    @Test func statusesNeedingAttentionAreMostUrgentFirst() {
+        let toMerge = PullRequest.fixture(1, reviewDecision: .approved)
+        let waiting = PullRequest.fixture(2, requestedReviewers: ["bob"])
+        let red = PullRequest.fixture(3, checks: .failing, requestedReviewers: ["bob"])
+        let toReview = PullRequest.fixture(7, author: "alice")
+        let snapshot = Snapshot.fixture(authored: [toMerge, waiting, red], reviewRequested: [toReview])
+        #expect(snapshot.statusesNeedingAttention == [.failing, .attention, .ready])
+        #expect(Snapshot.fixture(authored: [waiting]).statusesNeedingAttention == [])
+    }
 }
