@@ -3,7 +3,7 @@
 A macOS menu bar app that tracks the GitHub pull requests I'm involved with and notifies me when one needs me.
 
 - **Notifies** when my review is requested by name, when someone reviews one of my pull requests, and when one of mine fails CI or gets a merge conflict.
-- **Menu bar**: a square glyph showing the most urgent status, with a dropdown of the pull requests that need something.
+- **Menu bar**: a square glyph showing the most urgent status, with a dropdown of the pull requests that need something, one line each.
 - **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link.
 
 It polls GitHub every 60 seconds with the token from the `gh` CLI. It stores no credentials.
@@ -58,6 +58,7 @@ Each layer only knows about the ones below it.
 - **The words for a next step**: `TrackerApp/Presentation/Snapshot+Facts.swift`.
 - **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift`. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
 - **The sections of the window**: `TrackerApp/Views/MainWindow.swift`.
+- **A row**: `Views/PullRequestRow.swift` in the window, `Views/CompactPullRequestRow.swift` in the menu panel. Both use `Views/PullRequestLink.swift` for click and right-click.
 - **Colours, type and spacing**: `docs/design-system` first, then `Sources/Hairline`.
 
 ## Limits of building without Xcode
