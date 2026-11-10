@@ -4,7 +4,7 @@ import SwiftUI
 public struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(LaunchAtLogin.self) private var launchAtLogin
-    @AppStorage(DarkMode.key) private var usesDarkMode = false
+    @AppStorage(Appearance.key) private var appearance = Appearance.system
 
     public init() {}
 
@@ -19,15 +19,10 @@ public struct SettingsView: View {
                 }
             }
             .toggleStyle(.hairlineCheckbox)
-            Toggle(isOn: $usesDarkMode) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Use dark mode").textStyle(.control).foregroundStyle(Palette.ink)
-                    Text("When this is off, PR Tracker follows the system.")
-                        .textStyle(.small)
-                        .foregroundStyle(Palette.inkMuted)
-                }
+            VStack(alignment: .leading, spacing: Space.s1) {
+                Text("Appearance").textStyle(.control).foregroundStyle(Palette.ink)
+                Choice(Appearance.allCases, selection: $appearance, title: \.title)
             }
-            .toggleStyle(.hairlineCheckbox)
             VStack(alignment: .leading, spacing: Space.s1) {
                 Text("Refresh every").textStyle(.control).foregroundStyle(Palette.ink)
                 Choice(AppModel.refreshChoices, selection: Binding(get: { model.refreshMinutes }, set: { model.refreshMinutes = $0 })) { "\($0) min" }

@@ -20,7 +20,7 @@ Needs macOS 26 or later, Swift 6.2 or later, and `gh` logged in (`gh auth login`
 open build/gh-tracker.app
 ```
 
-Open the window from the menu bar item. It has no title bar: its three buttons sit in line with the header. While the window is open the app is in the Dock and has a menu bar, with Settings (⌘,) for opening at login, dark mode and how often to refresh, and View › Refresh (⌘R). The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
+Open the window from the menu bar item. It has no title bar: its three buttons sit in line with the header. While the window is open the app is in the Dock and has a menu bar, with Settings (⌘,) for opening at login, the appearance (match the system, light or dark) and how often to refresh, and View › Refresh (⌘R). The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
 
 ## Develop
 

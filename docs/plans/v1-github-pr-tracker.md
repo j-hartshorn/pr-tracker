@@ -25,7 +25,7 @@ These are my defaults. Change any of them before I start.
 2. **"Review posted"** means any submitted review (approved, changes requested, or commented) on one of my open PRs, by a person other than me.
 3. **Red and conflict notifications** are for my own PRs only, and fire once when the state changes to red or to conflicting. A PR that goes green and then red again notifies again.
 4. **Poll interval**: 60 seconds. "Timely" means within about a minute.
-5. **Theme**: follows the system appearance. Paper in light mode, Dark in dark mode. Stark is not offered in v1. A setting keeps the app in Dark whatever the system is.
+5. **Theme**: follows the system appearance. Paper in light mode, Dark in dark mode. Stark is not offered in v1. A setting can fix the app to Paper or to Dark whatever the system is.
 6. **No Dock icon** while the window is closed: the app lives in the menu bar and opens its window from there.
 7. **Clicking a notification** opens the PR (or the review) in the default browser.
 8. **Auth**: the app asks `gh auth token` for a token. It stores no credentials of its own.

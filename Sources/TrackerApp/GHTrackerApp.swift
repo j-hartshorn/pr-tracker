@@ -30,7 +30,7 @@ public struct GHTrackerApp: App {
                 .environment(copier)
                 .containerBackground(Palette.bg, for: .window)
                 .ignoresSafeArea(edges: .top)
-                .darkWhenSet()
+                .followsAppearanceSetting()
                 .joinsDockWhileOpen(model)
         }
         .windowStyle(.hiddenTitleBar)
@@ -49,7 +49,7 @@ public struct GHTrackerApp: App {
                 .environment(model)
                 .environment(launchAtLogin)
                 .containerBackground(Palette.bg, for: .window)
-                .darkWhenSet()
+                .followsAppearanceSetting()
                 .joinsDockWhileOpen(model)
         }
 
@@ -57,7 +57,7 @@ public struct GHTrackerApp: App {
             MenuPanel()
                 .environment(model)
                 .environment(copier)
-                .darkWhenSet()
+                .followsAppearanceSetting()
         } label: {
             MenuBarIcon(status: model.snapshot?.mostUrgentStatus ?? .waiting)
         }
