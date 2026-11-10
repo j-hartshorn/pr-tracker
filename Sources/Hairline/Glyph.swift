@@ -50,7 +50,7 @@ public struct Glyph: View {
             context.fill(outer)
             return
         case .nested:
-            context.fill(rect.insetBy(dx: 7 * unit, dy: 7 * unit))
+            context.fill(rect.insetBy(dx: 5.5 * unit, dy: 5.5 * unit))
         case .half:
             context.move(to: CGPoint(x: outer.minX, y: outer.maxY))
             context.addLine(to: CGPoint(x: outer.maxX, y: outer.minY))

@@ -62,6 +62,7 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 | Warning | Square, half filled on the diagonal | Something may go wrong. |
 | Error | Solid square | Something went wrong. |
 
+- The inner square of the success glyph is 9 of the outer square's 16 units wide. That is the share the bars take of the square in the app icon.
 - Glyph outlines use `stroke-mark` (1.5px). Draw glyphs at 16px or 20px, with square corners. A status glyph that leads a two-line list row is 36px, the height of the two lines of text, so the row can be read from its glyph alone.
 - Most alerts are a hairline box. Only an error **toast** is inverted (`ink` fill, `bg` text). That is the loudest thing this system can do. Use it only for things a person must not miss.
 - The glyph never works alone. The text must say what happened and what to do.
