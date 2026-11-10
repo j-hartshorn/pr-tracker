@@ -19,7 +19,7 @@ struct PullRequestRow: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
-                        .foregroundStyle(Palette.ink)
+                        .foregroundStyle(pullRequest.isDraft ? Palette.inkMuted : Palette.ink)
                         .lineLimit(1)
                     detail.lineLimit(2)
                 }
@@ -43,11 +43,12 @@ struct PullRequestRow: View {
         .overlay(alignment: .leading) { stackGuides }
     }
 
-    /// The next step in ink, then the quiet facts.
+    /// The next step, then the quiet facts. The step is in ink when it is mine, so a parked draft stays grey throughout.
     private var detail: some View {
+        let isMine = snapshot.nextSteps(for: pullRequest)[0].isMine
         let nextSteps = Text(snapshot.nextStepsText(for: pullRequest))
             .font(TextStyle.small.font)
-            .foregroundStyle(Palette.ink)
+            .foregroundStyle(isMine || !pullRequest.isDraft ? Palette.ink : Palette.inkMuted)
         let facts = Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
             .font(TextStyle.label.font)
             .foregroundStyle(Palette.inkMuted)
