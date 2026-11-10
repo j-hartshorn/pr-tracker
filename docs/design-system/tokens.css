@@ -1,0 +1,83 @@
+/* Hairline — generated from tokens.json */
+
+@font-face{font-family:"Iosevka";src:url("fonts/Iosevka-300.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"Iosevka";src:url("fonts/Iosevka-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Iosevka";src:url("fonts/Iosevka-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Iosevka Aile";src:url("fonts/IosevkaAile-300.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"Iosevka Aile";src:url("fonts/IosevkaAile-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Iosevka Aile";src:url("fonts/IosevkaAile-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Iosevka Aile";src:url("fonts/IosevkaAile-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+
+:root, [data-theme="paper"] {
+  --bg: #f4f5f6;
+  --surface: #eceef0;
+  --ink: #1e2329;
+  --ink-muted: #58606a;
+  --line: #cdd1d6;
+  --line-strong: #868e98;
+  --accent: #2b44c8;
+  --accent-ink: #ffffff;
+  --focus: var(--accent);
+  --font-prose: "Iosevka Aile", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: Iosevka, "SF Mono", Menlo, Consolas, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --space-6: 64px;
+  --space-7: 104px;
+  --radius-none: 0;
+  --radius-dot: 50%;
+  --stroke-hair: 1px;
+  --stroke-mark: 1.5px;
+  --stroke-focus: 2px;
+  --text-display: 300 48px/52px var(--font-prose);
+  --text-heading: 400 24px/32px var(--font-prose);
+  --text-subheading: 600 18px/26px var(--font-prose);
+  --text-body: 400 16px/26px var(--font-prose);
+  --text-small: 400 13px/20px var(--font-prose);
+  --text-code: 400 14px/22px var(--font-mono);
+  --text-data: 400 14px/20px var(--font-mono);
+  --text-label: 400 12px/16px var(--font-mono);
+}
+
+[data-theme="stark"] {
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --ink: #000000;
+  --ink-muted: #555555;
+  --line: #d9d9d9;
+  --line-strong: #8a8a8a;
+  --accent: #2b44c8;
+  --accent-ink: #ffffff;
+  --focus: var(--accent);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #15181c;
+  --surface: #1c2026;
+  --ink: #e4e7ea;
+  --ink-muted: #9aa2ac;
+  --line: #2c3238;
+  --line-strong: #6a727c;
+  --accent: #8c9cff;
+  --accent-ink: #15181c;
+  --focus: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #15181c;
+    --surface: #1c2026;
+    --ink: #e4e7ea;
+    --ink-muted: #9aa2ac;
+    --line: #2c3238;
+    --line-strong: #6a727c;
+    --accent: #8c9cff;
+    --accent-ink: #15181c;
+    --focus: var(--accent);
+  }
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hairline components</title>
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components/bundle.css">
+<style>
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-prose)}
+main{max-width:960px;margin:0 auto;padding:64px 40px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:40px}
+h1{font:var(--text-display);margin:0}
+h2{font:var(--text-label);color:var(--ink-muted);margin:0 0 8px}
+section{border-bottom:1px solid var(--line);padding:24px 0}
+select{font:var(--text-code);background:var(--bg);color:var(--ink);border:1px solid var(--line-strong);border-radius:0;padding:4px 8px}
+</style></head>
+<body><main>
+<header><h1>Hairline</h1>
+<label style="font:var(--text-label);color:var(--ink-muted)">Theme
+<select onchange="document.documentElement.dataset.theme=this.value"><option value="paper">Paper</option><option value="stark">Stark</option><option value="dark">Dark</option></select></label></header>
+<section><h2>Button</h2><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:24px;background:var(--bg)">
+  <button class="hl-button hl-button--primary">Save changes</button>
+  <button class="hl-button">Cancel</button>
+  <button class="hl-button hl-button--accent">Publish</button>
+  <button class="hl-button hl-button--quiet">Show details</button>
+  <button class="hl-button" disabled>Archived</button>
+</div>
+</section>
+<section><h2>Field</h2><div style="display:flex;gap:40px;flex-wrap:wrap;padding:24px;background:var(--bg)">
+  <label class="hl-field">
+    <span class="hl-field__label">Project name</span>
+    <input class="hl-field__input" value="field-notes">
+    <span class="hl-field__help">Lowercase letters and hyphens.</span>
+  </label>
+  <label class="hl-field hl-field--error">
+    <span class="hl-field__label">Email</span>
+    <input class="hl-field__input" placeholder="you@example.com">
+    <span class="hl-field__help">Enter an email address with an @ sign.</span>
+  </label>
+</div>
+</section>
+<section><h2>Alert</h2><div style="display:flex;flex-direction:column;gap:16px;padding:24px;background:var(--bg)">
+  <div class="hl-alert" role="status"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.75" y="2.75" width="14.5" height="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><div><div class="hl-alert__title">Comments are off for this post</div><div class="hl-alert__text">You can still reply by email.</div></div></div>
+  <div class="hl-alert" role="status"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.75" y="2.75" width="14.5" height="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="7" width="6" height="6" fill="currentColor"/></svg><div><div class="hl-alert__title">Changes saved</div><div class="hl-alert__text">Your post is live.</div></div></div>
+  <div class="hl-alert" role="status"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.75" y="2.75" width="14.5" height="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.75 17.25 L17.25 2.75 L17.25 17.25 Z" fill="currentColor"/></svg><div><div class="hl-alert__title">This draft is 3 days old</div><div class="hl-alert__text">Someone else may have edited it. Reload to see the latest version.</div></div></div>
+  <div class="hl-alert hl-alert--error" role="alert"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" fill="currentColor"/></svg><div><div class="hl-alert__title">Your post was not published</div><div class="hl-alert__text">The title is empty. Add a title, then publish again.</div></div></div>
+</div>
+</section>
+<section><h2>Toast</h2><div style="display:flex;flex-direction:column;gap:16px;padding:24px;background:var(--bg)">
+  <div class="hl-toast" role="status"><div class="hl-toast__msg"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.75" y="2.75" width="14.5" height="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="7" width="6" height="6" fill="currentColor"/></svg><span>Draft saved</span></div><button class="hl-toast__action">Undo</button></div>
+  <div class="hl-toast hl-toast--error" role="alert"><div class="hl-toast__msg"><svg class="hl-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" fill="currentColor"/></svg><span>Couldn't publish. Check your connection.</span></div><button class="hl-toast__action">Try again</button></div>
+</div>
+</section>
+</main></body></html>
