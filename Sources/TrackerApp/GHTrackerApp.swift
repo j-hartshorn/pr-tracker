@@ -29,6 +29,7 @@ public struct GHTrackerApp: App {
                 .environment(model)
                 .environment(copier)
                 .containerBackground(Palette.bg, for: .window)
+                .ignoresSafeArea(edges: .top)
                 .darkWhenSet()
                 .joinsDockWhileOpen(model)
         }
