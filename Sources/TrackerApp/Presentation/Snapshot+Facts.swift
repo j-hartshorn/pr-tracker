@@ -34,13 +34,8 @@ extension Snapshot {
         if isMine, steps[0].isMine, !pr.requestedReviewers.isEmpty {
             facts.append("waiting on \(pr.requestedReviewers.joined(separator: ", "))")
         }
-        switch pr.checks {
-        case .failing where !isMine: facts.append("CI failing")
-        case .pending: facts.append("CI running")
-        case .passing: facts.append("CI passing")
-        case .failing, .none: break
-        }
-        guard isMine else { return facts }
+        // Only failing CI is news. On my own pull requests it is already the step "fix CI".
+        guard isMine else { return pr.checks == .failing ? facts + ["CI failing"] : facts }
         switch pr.approval {
         case .approved: facts.append("approved")
         case .changesRequested: facts.append("changes requested")
