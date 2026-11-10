@@ -4,9 +4,8 @@ import TrackerCore
 
 /// One pull request: status glyph, title, who has the ball, and its age. A click opens it on GitHub.
 struct PullRequestRow: View {
-    /// About as tall as the two lines of text, from the top of the title's capitals to the baseline under it.
-    private static let glyphSize: CGFloat = 32
-    private static let textHeight: CGFloat = 40
+    /// The height of the title line (20) and the facts line (16). The glyph's own margin then puts its square between the top of the title's capitals and the baseline of the facts.
+    private static let glyphSize: CGFloat = 36
     private static let nextStepColumnWidth: CGFloat = 240
     private static let ageColumnWidth: CGFloat = 32
 
@@ -24,14 +23,14 @@ struct PullRequestRow: View {
         Button { openURL(pullRequest.url) } label: {
             HStack(alignment: .top, spacing: Space.s3) {
                 Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color, size: Self.glyphSize)
-                    .frame(height: Self.textHeight)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
                         .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
+                    // The facts alone sit on the label's own 16pt line. Mixed with the larger next step they need 20.
                     (showsNextStepColumn ? facts : Text("\(nextSteps)   \(facts)"))
-                        .lineHeight(.exact(points: 20))
+                        .lineHeight(.exact(points: showsNextStepColumn ? 16 : 20))
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
