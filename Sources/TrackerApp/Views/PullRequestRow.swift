@@ -25,7 +25,7 @@ struct PullRequestRow: View {
                         .textStyle(.control)
                         .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
-                    Text("\(Text(verbatim: "#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(snapshot.facts(about: pullRequest).joined(separator: " · "))")
+                    facts
                         .textStyle(.label)
                         .foregroundStyle(quiet)
                         .lineLimit(2)
@@ -46,6 +46,16 @@ struct PullRequestRow: View {
         .padding(.vertical, Space.s2)
         .padding(.leading, CGFloat(depth) * Self.glyphSize)
         .overlay(alignment: .leading) { stackGuides }
+    }
+
+    /// The number, the repository, a dot in the colour of its CI, then the other facts.
+    private var facts: Text {
+        var line = Text("\(Text(verbatim: "#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(pullRequest.repository)")
+        if let color = pullRequest.checks.color {
+            line = Text("\(line) \(Text(verbatim: "●").foregroundStyle(isParked ? Palette.lineStrong : color))")
+        }
+        let rest = snapshot.facts(about: pullRequest)
+        return rest.isEmpty ? line : Text("\(line) · \(rest.joined(separator: " · "))")
     }
 
     /// A draft with nothing for me to do. The whole row drops to the disabled grey.

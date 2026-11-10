@@ -35,7 +35,7 @@ Rules:
 
 ## Status colours
 
-There are three status colours. They are the only colours apart from the accent. They are for status glyphs, and for the bars of the app icon (see "App icon" below).
+There are three status colours. They are the only colours apart from the accent. They are for status glyphs, status dots, and the bars of the app icon (see "App icon" below).
 
 | Token | Paper and Stark | Dark | Use |
 | --- | --- | --- | --- |
@@ -45,9 +45,10 @@ There are three status colours. They are the only colours apart from the accent.
 
 Rules:
 
-- A status colour goes on a status glyph or a bar of the app icon, and nowhere else. Never on text, fills, borders or whole rows.
-- The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. One state mixes the two: something approved that cannot go ahead yet is the ready shape in `status-attention`. Colour is never the only signal, because red and green are hard to tell apart for some people.
+- A status colour goes on a status glyph, a status dot or a bar of the app icon, and nowhere else. Never on text, fills, borders or whole rows.
+- The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. It is never the only signal, because red and green are hard to tell apart for some people.
 - The text next to the glyph still says what the state is.
+- A status dot is a small round mark in a line of quiet text, for a second state of the same thing: here, the CI of a pull request. It is too small for a shape, so colour is its only signal. When the state needs the person, the text must say so too.
 - Something with no status has no colour. Most of the screen stays grey.
 - A status colour is not the accent. The accent still marks the one suggested next action.
 

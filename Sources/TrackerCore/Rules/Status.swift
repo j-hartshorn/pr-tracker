@@ -8,8 +8,6 @@ public enum Status: Int, Comparable, Sendable {
     case attention
     /// It is approved and can merge, now or when the pull request beneath it does.
     case ready
-    /// It is approved, and its checks are still running.
-    case approved
     /// The ball is with someone else.
     case waiting
 
@@ -22,8 +20,7 @@ extension NextStep {
         case .fixChecks, .resolveConflicts: .failing
         case .review, .answerComments, .answerMention, .respond, .requestReview: .attention
         case .merge, .waitingOnStack: .ready
-        case .waitingOnChecks: .approved
-        case .waitingOnReviewers, .waitingOnAuthor, .draft: .waiting
+        case .waitingOnReviewers, .waitingOnChecks, .waitingOnAuthor, .draft: .waiting
         }
     }
 }

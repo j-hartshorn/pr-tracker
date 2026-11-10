@@ -217,7 +217,6 @@ import Testing
         #expect(Snapshot.fixture().status(of: .fixture(checks: .failing, unansweredThreads: 1)) == .failing)
         #expect(Snapshot.fixture().status(of: .fixture(reviewDecision: .approved, unansweredThreads: 1)) == .attention)
         #expect(Snapshot.fixture().status(of: .fixture(reviewDecision: .approved)) == .ready)
-        #expect(Snapshot.fixture().status(of: .fixture(checks: .pending, reviewDecision: .approved)) == .approved)
         #expect(Snapshot.fixture().status(of: .fixture(requestedReviewers: ["bob"])) == .waiting)
         #expect(Snapshot.fixture().status(of: .fixture(isDraft: true)) == .waiting)
     }
