@@ -15,18 +15,18 @@ struct PullRequestRow: View {
         let status = snapshot.status(of: pullRequest)
         Button { openURL(pullRequest.url) } label: {
             HStack(alignment: .top, spacing: Space.s3) {
-                Glyph(status.glyph, color: status.color).padding(.top, 2)
+                Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color).padding(.top, 2)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
-                        .foregroundStyle(pullRequest.isDraft ? Palette.inkMuted : Palette.ink)
+                        .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
                     detail.lineLimit(2)
                 }
                 Spacer(minLength: 0)
                 Text(snapshot.age(of: pullRequest))
                     .textStyle(.label)
-                    .foregroundStyle(Palette.inkMuted)
+                    .foregroundStyle(quiet)
                     .padding(.top, 2)
             }
             .contentShape(Rectangle())
@@ -43,15 +43,23 @@ struct PullRequestRow: View {
         .overlay(alignment: .leading) { stackGuides }
     }
 
-    /// The next step, then the quiet facts. The step is in ink when it is mine, so a parked draft stays grey throughout.
+    /// A draft with nothing for me to do. The whole row drops to the disabled grey.
+    private var isParked: Bool {
+        pullRequest.isDraft && !snapshot.nextSteps(for: pullRequest)[0].isMine
+    }
+
+    private var quiet: Color {
+        isParked ? Palette.lineStrong : Palette.inkMuted
+    }
+
+    /// The next step, then the quiet facts.
     private var detail: some View {
-        let isMine = snapshot.nextSteps(for: pullRequest)[0].isMine
         let nextSteps = Text(snapshot.nextStepsText(for: pullRequest))
             .font(TextStyle.small.font)
-            .foregroundStyle(isMine || !pullRequest.isDraft ? Palette.ink : Palette.inkMuted)
+            .foregroundStyle(isParked ? Palette.lineStrong : Palette.ink)
         let facts = Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
             .font(TextStyle.label.font)
-            .foregroundStyle(Palette.inkMuted)
+            .foregroundStyle(quiet)
         return Text("\(nextSteps)   \(facts)").lineHeight(.exact(points: 20))
     }
 
