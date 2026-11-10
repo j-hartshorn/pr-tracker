@@ -26,7 +26,7 @@ These are my defaults. Change any of them before I start.
 3. **Red and conflict notifications** are for my own PRs only, and fire once when the state changes to red or to conflicting. A PR that goes green and then red again notifies again.
 4. **Poll interval**: 60 seconds. "Timely" means within about a minute.
 5. **Theme**: follows the system appearance. Paper in light mode, Dark in dark mode. Stark is not offered in v1.
-6. **No Dock icon**: the app lives in the menu bar and opens its window from there.
+6. **No Dock icon** while the window is closed: the app lives in the menu bar and opens its window from there.
 7. **Clicking a notification** opens the PR (or the review) in the default browser.
 8. **Auth**: the app asks `gh auth token` for a token. It stores no credentials of its own.
 9. **First run** records a baseline and sends no notifications, so I don't get 20 at once.
@@ -51,6 +51,8 @@ These are my defaults. Change any of them before I start.
 - **`@State` needs Xcode.** On this SDK it is a macro whose compiler plugin does not ship with the Command Line Tools. The app keeps state in `@Observable` classes held with `let`.
 - **Test builds are flaky without Xcode.** Some builds cannot find the Testing macro plugin. `scripts/check.sh` builds again when that happens.
 - **The window does not open at launch**, because the app has no Dock icon. It opens from the menu bar item.
+- **The menu bar needs the Dock.** macOS shows an app's menu bar only while the app is in the Dock, so the app joins the Dock while its window or Settings is open.
+- **Open at login works for the ad-hoc signed app** with `SMAppService.mainApp`, and the registration survives a rebuild.
 - **The app only reads.** It had draft actions on right-click, but in use it was simpler to do them on GitHub. A right-click now copies the link.
 - **Minimum macOS is 26**, for exact line heights in SwiftUI.
 

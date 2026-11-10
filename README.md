@@ -19,7 +19,7 @@ Needs macOS 26 or later, Swift 6.2 or later, and `gh` logged in (`gh auth login`
 open build/gh-tracker.app
 ```
 
-The app has no Dock icon. Open the window from the menu bar item. The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
+Open the window from the menu bar item. While the window is open the app is in the Dock and has a menu bar, with Settings (⌘,) for opening at login and View › Refresh (⌘R). The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
 
 ## Develop
 

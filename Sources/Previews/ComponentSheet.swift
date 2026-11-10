@@ -27,6 +27,14 @@ struct ComponentSheet: View {
                 Image(nsImage: Glyph.image(.solid, color: Palette.statusFailing, size: 18))
             }
             Rule()
+            HStack(spacing: Space.s4) {
+                Toggle("Off", isOn: .constant(false))
+                Toggle("On", isOn: .constant(true))
+            }
+            .toggleStyle(.hairlineCheckbox)
+            .textStyle(.control)
+            .foregroundStyle(Palette.ink)
+            Rule()
             AlertBox(.warning, title: "This draft is 3 days old", detail: "Someone else may have edited it. Reload to see the latest version.")
             AlertBox(.error, title: "Your post was not published", detail: "The title is empty. Add a title, then publish again.")
             HStack(alignment: .firstTextBaseline, spacing: Space.s4) {

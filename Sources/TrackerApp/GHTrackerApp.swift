@@ -7,6 +7,7 @@ public struct GHTrackerApp: App {
 
     // Held with let and not @State, because @State needs a compiler plugin that ships only with Xcode.
     private let model: AppModel
+    private let launchAtLogin = LaunchAtLogin()
 
     public init() {
         if let resources = Bundle.main.resourceURL {
@@ -36,6 +37,13 @@ public struct GHTrackerApp: App {
                     .disabled(model.isRefreshing)
             }
             CommandGroup(replacing: .help) {}
+        }
+
+        Settings {
+            SettingsView()
+                .environment(launchAtLogin)
+                .containerBackground(Palette.bg, for: .window)
+                .joinsDockWhileOpen()
         }
 
         MenuBarExtra {

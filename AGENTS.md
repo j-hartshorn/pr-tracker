@@ -12,7 +12,7 @@ swift run Previews                    # every view as PNG in build/previews, lig
 pkill -f "gh-tracker.app/Contents/MacOS/GHTracker"; open build/gh-tracker.app   # restart the app
 ```
 
-- Open the app a second time (`open build/gh-tracker.app`) to bring its window up. It has no Dock icon.
+- Open the app a second time (`open build/gh-tracker.app`) to bring its window up. It is in the Dock, with its menu bar, only while its window or Settings is open (`DockPresence.swift`).
 - Logs: `log show --last 5m --info --predicate 'subsystem == "local.gh-tracker"'`.
 
 ## Version control

@@ -81,6 +81,12 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 - All borders are `stroke-hair` (1px). The focus ring is `stroke-focus` (2px) in `focus`. That is the only thick line.
 - No shadows.
 
+## Checkbox
+
+- A 16px square with square corners, aligned to the first line of its label.
+- Off: a `stroke-mark` outline in `line-strong`. On: an `ink` fill with a `bg` tick in `stroke-mark`, square ends.
+- The label says what is true when it is on, in sentence case: "Open at login". Help text goes under it in `ink-muted`.
+
 ## Writing
 
 - Short and plain. Use verbs on buttons: "Save changes", not "Submit".
