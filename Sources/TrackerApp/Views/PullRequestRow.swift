@@ -4,8 +4,9 @@ import TrackerCore
 
 /// One pull request: status glyph, title, who has the ball, and its age. A click opens it on GitHub.
 struct PullRequestRow: View {
-    /// As tall as the title and the line under it together.
-    private static let glyphSize: CGFloat = 40
+    /// About as tall as the two lines of text, from the top of the title's capitals to the baseline under it.
+    private static let glyphSize: CGFloat = 32
+    private static let textHeight: CGFloat = 40
     private static let nextStepColumnWidth: CGFloat = 240
     private static let ageColumnWidth: CGFloat = 32
 
@@ -23,6 +24,7 @@ struct PullRequestRow: View {
         Button { openURL(pullRequest.url) } label: {
             HStack(alignment: .top, spacing: Space.s3) {
                 Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color, size: Self.glyphSize)
+                    .frame(height: Self.textHeight)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
@@ -55,7 +57,7 @@ struct PullRequestRow: View {
             }
         }
         .padding(.vertical, Space.s2)
-        .padding(.leading, CGFloat(depth) * Space.s4)
+        .padding(.leading, CGFloat(depth) * Self.glyphSize)
         .overlay(alignment: .leading) { stackGuides }
     }
 
@@ -80,11 +82,11 @@ struct PullRequestRow: View {
             .foregroundStyle(quiet)
     }
 
-    /// One vertical hairline for each pull request beneath this one in its stack.
+    /// One vertical hairline for each pull request beneath this one in its stack. Each indent is one glyph wide, so a line runs down from the centre of the glyph it belongs to.
     private var stackGuides: some View {
         HStack(spacing: 0) {
             ForEach(0..<depth, id: \.self) { _ in
-                Rule(.vertical).frame(width: Space.s4)
+                Rule(.vertical).frame(width: Self.glyphSize)
             }
         }
     }

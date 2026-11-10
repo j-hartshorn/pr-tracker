@@ -62,7 +62,7 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 | Warning | Square, half filled on the diagonal | Something may go wrong. |
 | Error | Solid square | Something went wrong. |
 
-- Glyph outlines use `stroke-mark` (1.5px). Draw glyphs at 16px or 20px, with square corners. A status glyph that leads a two-line list row is 40px, as tall as the two lines, so the row can be read from its glyph alone.
+- Glyph outlines use `stroke-mark` (1.5px). Draw glyphs at 16px or 20px, with square corners. A status glyph that leads a two-line list row is 32px, about as tall as the two lines of text, so the row can be read from its glyph alone.
 - Most alerts are a hairline box. Only an error **toast** is inverted (`ink` fill, `bg` text). That is the loudest thing this system can do. Use it only for things a person must not miss.
 - The glyph never works alone. The text must say what happened and what to do.
 - The accent has too little contrast on an `ink` fill. In an inverted toast, the action button is a `bg` fill with `ink` text.
