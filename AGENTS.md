@@ -17,7 +17,7 @@ pkill -f "gh-tracker.app/Contents/MacOS/GHTracker"; open build/gh-tracker.app   
 
 ## Version control
 
-- Use `jj`, not `git`. There is no remote.
+- Use `jj`, not `git`. The remote is `origin`, on GitHub, and the branch is `main`.
 - `jj commit -m "..."` adds the sign-off trailer by itself. Pass paths to commit part of the working copy.
 - One logical change per commit. Run the tests first, and check their exit status, not only the last line of output.
 
