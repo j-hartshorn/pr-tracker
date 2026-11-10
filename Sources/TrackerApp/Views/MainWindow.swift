@@ -11,7 +11,9 @@ public struct MainWindow: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-                .padding(.horizontal, Space.s4)
+                // The window has no title bar, so its three buttons sit at the start of this row.
+                .padding(.leading, Space.s6 + Space.s3)
+                .padding(.trailing, Space.s4)
                 .padding(.vertical, Space.s2)
             Rule()
             if let error = model.lastError {
