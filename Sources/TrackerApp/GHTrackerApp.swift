@@ -26,8 +26,17 @@ public struct GHTrackerApp: App {
             MainWindow()
                 .environment(model)
                 .containerBackground(Palette.bg, for: .window)
+                .joinsDockWhileOpen()
         }
         .defaultSize(width: 860, height: 900)
+        .commands {
+            CommandGroup(before: .toolbar) {
+                Button("Refresh") { Task { await model.refresh(everything: true) } }
+                    .keyboardShortcut("r")
+                    .disabled(model.isRefreshing)
+            }
+            CommandGroup(replacing: .help) {}
+        }
 
         MenuBarExtra {
             MenuPanel()
