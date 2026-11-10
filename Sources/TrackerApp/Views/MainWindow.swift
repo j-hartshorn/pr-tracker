@@ -14,8 +14,7 @@ public struct MainWindow: View {
                 // The window has no title bar, so its three buttons sit at the start of this row.
                 .padding(.leading, Space.s6 + Space.s3)
                 .padding(.trailing, Space.s4)
-                .padding(.top, Space.s1)
-                .padding(.bottom, Space.s2)
+                .padding(.vertical, Space.s1)
             Rule()
             if let error = model.lastError {
                 AlertBox(.error, title: "The last refresh failed", detail: error)
@@ -41,7 +40,7 @@ public struct MainWindow: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Space.s3) {
+        HStack(spacing: Space.s3) {
             Text("PR Tracker").textStyle(.subheading).foregroundStyle(Palette.ink)
             Spacer()
             if let snapshot = model.snapshot {
