@@ -1,6 +1,6 @@
 # gh-tracker
 
-A macOS menu bar app, for one person, that tracks the GitHub pull requests they are involved with. Swift 6.2, SwiftUI, macOS 26 or later. `README.md` has the code layout and where each rule lives. `docs/plans/v1-github-pr-tracker.md` has the decisions and the reasons for them.
+A macOS menu bar app, for one person, that tracks the GitHub pull requests they are involved with. Swift 6.2, SwiftUI, macOS 26 or later. `docs/layout.md` has the code layout and where each rule lives. `docs/plans/v1-github-pr-tracker.md` has the decisions and the reasons for them.
 
 ## Commands
 
