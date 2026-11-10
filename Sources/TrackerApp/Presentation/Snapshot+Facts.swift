@@ -27,7 +27,7 @@ extension Snapshot {
 
     /// The quiet facts after the next step. They add what the next step does not already say.
     func facts(about pr: PullRequest) -> [String] {
-        var facts = ["\(pr.repository) #\(pr.number)"]
+        var facts = ["#\(pr.number) \(pr.repository)"]
         let isMine = pr.author == viewer
         let steps = nextSteps(for: pr)
         if pr.isDraft, steps != [.draft] { facts.append("draft") }
