@@ -28,7 +28,7 @@
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/menu-dark.png">
-    <img src="docs/images/menu-paper.png" width="500" alt="The menu bar dropdown: one line for each pull request that needs something">
+    <img src="docs/images/menu-paper.png" width="640" alt="The menu bar dropdown: one line for each pull request that needs something">
   </picture>
 </div>
 
