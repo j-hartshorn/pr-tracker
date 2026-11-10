@@ -18,7 +18,7 @@ public struct MenuPanel: View {
                     .padding(.bottom, Space.s3)
             }
             if let snapshot = model.snapshot {
-                let pullRequests = snapshot.needingAttention
+                let pullRequests = snapshot.needingAttention(hidingDrafts: model.hidesDrafts)
                 if pullRequests.isEmpty {
                     Text("Nothing needs you right now.")
                         .textStyle(.small)

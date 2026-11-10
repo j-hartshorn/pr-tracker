@@ -183,7 +183,7 @@ import Testing
         let theirs = PullRequest.fixture(2, author: "alice")
         let snapshot = Snapshot.fixture(involved: [theirs])
         #expect(steps(theirs, in: snapshot) == [.waitingOnAuthor])
-        #expect(snapshot.needingAttention.isEmpty)
+        #expect(snapshot.needingAttention().isEmpty)
         #expect(snapshot.status(of: theirs) == .waiting)
     }
 
@@ -192,7 +192,7 @@ import Testing
         let mentioned = PullRequest.fixture(8, author: "bob", mentionedAt: Self.t1)
         let toMerge = PullRequest.fixture(1, reviewDecision: .approved)
         let snapshot = Snapshot.fixture(authored: [toMerge], reviewRequested: [toReview], involved: [mentioned])
-        #expect(snapshot.needingAttention.map(\.number) == [7, 8, 1])
+        #expect(snapshot.needingAttention().map(\.number) == [7, 8, 1])
         #expect(snapshot.status(of: mentioned) == .attention)
     }
 
@@ -208,7 +208,7 @@ import Testing
         let toReview = PullRequest.fixture(7, author: "alice")
         let alsoRed = PullRequest.fixture(8, mergeability: .conflicting, requestedReviewers: ["bob"])
         let snapshot = Snapshot.fixture(authored: [toMerge, waiting, red, toAnswer, draft, toRequest, alsoRed], reviewRequested: [toReview])
-        #expect(snapshot.needingAttention.map(\.number) == [7, 4, 3, 8, 6, 1])
+        #expect(snapshot.needingAttention().map(\.number) == [7, 4, 3, 8, 6, 1])
     }
 
     @Test func statusIsTheMostUrgentOfTheSteps() {
@@ -226,18 +226,29 @@ import Testing
         let top = PullRequest.fixture(2, base: "bottom", reviewDecision: .approved)
         let snapshot = Snapshot.fixture(authored: [bottom, top])
         #expect(snapshot.status(of: top) == .ready)
-        #expect(snapshot.needingAttention.isEmpty)
-        #expect(snapshot.mostUrgentStatus == .waiting)
+        #expect(snapshot.needingAttention().isEmpty)
+        #expect(snapshot.mostUrgentStatus() == .waiting)
     }
 
     @Test func mostUrgentStatusIsTheWorstAmongThoseThatNeedMe() {
         let theirs = PullRequest.fixture(9, author: "alice")
         let waiting = PullRequest.fixture(1, requestedReviewers: ["bob"])
-        #expect(Snapshot.fixture().mostUrgentStatus == .waiting)
-        #expect(Snapshot.fixture(authored: [waiting]).mostUrgentStatus == .waiting)
-        #expect(Snapshot.fixture(authored: [waiting, .fixture(2, reviewDecision: .approved)]).mostUrgentStatus == .ready)
-        #expect(Snapshot.fixture(authored: [.fixture(2, reviewDecision: .approved)], reviewRequested: [theirs]).mostUrgentStatus == .attention)
-        #expect(Snapshot.fixture(authored: [.fixture(1, checks: .failing)], reviewRequested: [theirs]).mostUrgentStatus == .failing)
+        #expect(Snapshot.fixture().mostUrgentStatus() == .waiting)
+        #expect(Snapshot.fixture(authored: [waiting]).mostUrgentStatus() == .waiting)
+        #expect(Snapshot.fixture(authored: [waiting, .fixture(2, reviewDecision: .approved)]).mostUrgentStatus() == .ready)
+        #expect(Snapshot.fixture(authored: [.fixture(2, reviewDecision: .approved)], reviewRequested: [theirs]).mostUrgentStatus() == .attention)
+        #expect(Snapshot.fixture(authored: [.fixture(1, checks: .failing)], reviewRequested: [theirs]).mostUrgentStatus() == .failing)
+    }
+
+    @Test func hidingDraftsLeavesThemOutOfWhatNeedsMe() {
+        let brokenDraft = PullRequest.fixture(1, isDraft: true, checks: .failing)
+        let theirDraft = PullRequest.fixture(2, author: "alice", isDraft: true)
+        let broken = PullRequest.fixture(3, checks: .failing)
+        let snapshot = Snapshot.fixture(authored: [brokenDraft, broken], reviewRequested: [theirDraft])
+        #expect(snapshot.needingAttention().map(\.number) == [2, 1, 3])
+        #expect(snapshot.needingAttention(hidingDrafts: true).map(\.number) == [3])
+        #expect(snapshot.statusesNeedingAttention(hidingDrafts: true) == [.failing])
+        #expect(Snapshot.fixture(authored: [brokenDraft]).mostUrgentStatus(hidingDrafts: true) == .waiting)
     }
 
     @Test func statusesNeedingAttentionAreMostUrgentFirst() {
@@ -246,7 +257,7 @@ import Testing
         let red = PullRequest.fixture(3, checks: .failing, requestedReviewers: ["bob"])
         let toReview = PullRequest.fixture(7, author: "alice")
         let snapshot = Snapshot.fixture(authored: [toMerge, waiting, red], reviewRequested: [toReview])
-        #expect(snapshot.statusesNeedingAttention == [.failing, .attention, .ready])
-        #expect(Snapshot.fixture(authored: [waiting]).statusesNeedingAttention == [])
+        #expect(snapshot.statusesNeedingAttention() == [.failing, .attention, .ready])
+        #expect(Snapshot.fixture(authored: [waiting]).statusesNeedingAttention() == [])
     }
 }

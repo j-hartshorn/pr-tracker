@@ -61,7 +61,7 @@ public struct MainWindow: View {
     private func sections(_ snapshot: Snapshot) -> some View {
         VStack(alignment: .leading, spacing: Space.s5) {
             section(
-                "Needs attention", rows: snapshot.needingAttention.map { PullRequestListRow(pullRequest: $0) },
+                "Needs attention", rows: snapshot.needingAttention(hidingDrafts: model.hidesDrafts).map { PullRequestListRow(pullRequest: $0) },
                 in: snapshot, emptyText: "Nothing needs you right now."
             )
             section("Mine", rows: PullRequestListRow.rows(from: snapshot.stacks), in: snapshot, emptyText: "You have no open pull requests.")

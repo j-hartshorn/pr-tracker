@@ -30,6 +30,15 @@ public struct SettingsView: View {
                     .textStyle(.small)
                     .foregroundStyle(Palette.inkMuted)
             }
+            Toggle(isOn: Binding(get: { model.hidesDrafts }, set: { model.hidesDrafts = $0 })) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Ignore drafts").textStyle(.control).foregroundStyle(Palette.ink)
+                    Text("Leave drafts out of Needs attention, and send no notifications about them.")
+                        .textStyle(.small)
+                        .foregroundStyle(Palette.inkMuted)
+                }
+            }
+            .toggleStyle(.hairlineCheckbox)
             if launchAtLogin.status == .requiresApproval {
                 AlertBox(.info, title: "Waiting for your approval", detail: "Allow PR Tracker in System Settings, under General, then Login Items.")
             }

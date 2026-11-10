@@ -59,7 +59,7 @@ public struct GHTrackerApp: App {
                 .environment(copier)
                 .followsAppearanceSetting()
         } label: {
-            MenuBarIcon(status: model.snapshot?.mostUrgentStatus ?? .waiting)
+            MenuBarIcon(status: model.snapshot?.mostUrgentStatus(hidingDrafts: model.hidesDrafts) ?? .waiting)
         }
         .menuBarExtraStyle(.window)
     }

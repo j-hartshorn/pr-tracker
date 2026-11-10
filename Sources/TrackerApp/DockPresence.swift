@@ -37,7 +37,7 @@ private struct JoinsDock: ViewModifier {
 
     /// One status for each bar of the icon.
     private var statuses: [Status] {
-        Array((model.snapshot?.statusesNeedingAttention ?? []).prefix(3))
+        Array((model.snapshot?.statusesNeedingAttention(hidingDrafts: model.hidesDrafts) ?? []).prefix(3))
     }
 
     private func showIcon() {

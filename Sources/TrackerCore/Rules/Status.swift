@@ -31,12 +31,12 @@ extension Snapshot {
     }
 
     /// The most urgent status among the pull requests that need me.
-    public var mostUrgentStatus: Status {
-        statusesNeedingAttention.first ?? .waiting
+    public func mostUrgentStatus(hidingDrafts: Bool = false) -> Status {
+        statusesNeedingAttention(hidingDrafts: hidingDrafts).first ?? .waiting
     }
 
     /// One status for each pull request that needs me, most urgent first.
-    public var statusesNeedingAttention: [Status] {
-        needingAttention.map(status(of:)).sorted()
+    public func statusesNeedingAttention(hidingDrafts: Bool = false) -> [Status] {
+        needingAttention(hidingDrafts: hidingDrafts).map(status(of:)).sorted()
     }
 }

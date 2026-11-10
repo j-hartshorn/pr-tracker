@@ -45,6 +45,7 @@ Put a rule in `Rules` with a test, not in a view.
 - **A pull request is mine to review only if I am requested by name.** Team requests are ignored.
 - **Someone else's pull request also needs me when I am mentioned on it, or when someone replies in a review thread I began.** A mention stands until I comment or review. A thread stands until I reply or it is resolved. A new review request replaces both.
 - **Every pull request has next steps** (`Rules/NextStep.swift`): the steps that are mine, or the one thing it waits on. The window, the menu bar icon and the colours all come from these.
+- **"Ignore drafts" in Settings leaves every draft, mine or not, out of what needs me**: Needs attention, the menu bar icon, the Dock bars and notifications. The draft's row under Mine does not change.
 - **Notifications come from comparing two snapshots** (`Rules/Snapshot+Events.swift`). The first snapshot is a silent baseline.
 - **Adding a stored field to `PullRequest` makes the saved snapshot unreadable**, so the next poll is a silent baseline. This is fine, but expect it.
 

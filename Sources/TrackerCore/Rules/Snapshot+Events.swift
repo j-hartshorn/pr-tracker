@@ -1,8 +1,8 @@
 import Foundation
 
 extension Snapshot {
-    /// The events that happened between `old` and this snapshot. With no `old` this is the baseline, so nothing is an event.
-    public func events(since old: Snapshot?) -> [Event] {
+    /// The events that happened between `old` and this snapshot. With no `old` this is the baseline, so nothing is an event. `hidingDrafts` drops the events of every draft.
+    public func events(since old: Snapshot?, hidingDrafts: Bool = false) -> [Event] {
         guard let old else { return [] }
         let oldAuthored = Dictionary(old.authored.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let oldRequested = Set(old.reviewRequested.map(\.id))
@@ -34,7 +34,7 @@ extension Snapshot {
             }
             return events
         }
-        return requested + involvedEvents + authoredEvents
+        return (requested + involvedEvents + authoredEvents).filter { !(hidingDrafts && $0.pullRequest.isDraft) }
     }
 
     /// GitHub computes mergeability lazily and often answers "unknown". Keeping the last known answer stops that from hiding or repeating a conflict.

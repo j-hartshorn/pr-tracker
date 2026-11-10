@@ -82,9 +82,10 @@ extension Snapshot {
         return pr.mentionedAt == nil ? .waitingOnAuthor : .answerMention
     }
 
-    /// The pull requests where the ball is with me, in the order to look at them.
-    public var needingAttention: [PullRequest] {
+    /// The pull requests where the ball is with me, in the order to look at them. `hidingDrafts` leaves out every draft, mine or not.
+    public func needingAttention(hidingDrafts: Bool = false) -> [PullRequest] {
         (reviewRequested + involved + authored)
+            .filter { !(hidingDrafts && $0.isDraft) }
             .map { (pullRequest: $0, rank: nextSteps(for: $0)[0].rank) }
             .filter { $0.rank < NextStep.draft.rank }
             .enumerated()

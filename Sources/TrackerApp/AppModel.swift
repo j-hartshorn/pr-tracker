@@ -26,6 +26,12 @@ public final class AppModel {
     }
     @ObservationIgnored private var wait: Task<Void, Never>?
 
+    private static let hidesDraftsKey = "hidesDrafts"
+    /// Leaves drafts out of what needs me, and sends no notifications about them.
+    public var hidesDrafts: Bool {
+        didSet { UserDefaults.standard.set(hidesDrafts, forKey: Self.hidesDraftsKey) }
+    }
+
     private let client: GitHubClient
     private let file: SnapshotFile
     private let notify: @Sendable (Event) async -> Void
@@ -36,6 +42,7 @@ public final class AppModel {
         self.notify = notify
         self.snapshot = file.load()
         self.refreshMinutes = UserDefaults.standard.object(forKey: Self.refreshMinutesKey) as? Int ?? 1
+        self.hidesDrafts = UserDefaults.standard.bool(forKey: Self.hidesDraftsKey)
     }
 
     public func start() {
@@ -56,7 +63,7 @@ public final class AppModel {
         defer { isRefreshing = false }
         do {
             let new = try await client.fetchSnapshot(reusing: everything ? nil : snapshot).carryingMergeability(from: snapshot)
-            let events = new.events(since: snapshot)
+            let events = new.events(since: snapshot, hidingDrafts: hidesDrafts)
             snapshot = new
             lastError = nil
             log.info("refreshed: \(new.authored.count) authored, \(new.reviewRequested.count) to review, \(new.involved.count) involved, \(events.count) events")

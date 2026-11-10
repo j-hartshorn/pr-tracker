@@ -27,6 +27,15 @@ import Testing
         #expect(events[0].body == "acme/widgets #2: Change 2")
     }
 
+    @Test func hidingDraftsDropsTheirEvents() {
+        let draft = PullRequest.fixture(1, isDraft: true, checks: .failing)
+        let ready = PullRequest.fixture(2, checks: .failing)
+        let theirDraft = PullRequest.fixture(3, author: "alice", isDraft: true)
+        let new = Snapshot.fixture(authored: [draft, ready], reviewRequested: [theirDraft])
+        #expect(new.events(since: .fixture()).map(\.pullRequest.number) == [3, 1, 2])
+        #expect(new.events(since: .fixture(), hidingDrafts: true).map(\.pullRequest.number) == [2])
+    }
+
     @Test func mentionedWhenIAmNewlyTagged() {
         let t0 = Date(timeIntervalSince1970: 1_700_000_000)
         let quiet = PullRequest.fixture(2, author: "alice")
