@@ -2,11 +2,16 @@ import Hairline
 import SwiftUI
 import TrackerCore
 
-/// One pull request: status glyph, title, then who has the ball. A click opens it on GitHub.
+/// One pull request: status glyph, title, who has the ball, and its age. A click opens it on GitHub.
 struct PullRequestRow: View {
+    private static let nextStepColumnWidth: CGFloat = 240
+    private static let ageColumnWidth: CGFloat = 32
+
     let pullRequest: PullRequest
     let snapshot: Snapshot
     var depth = 0
+    /// The next step gets its own column where there is room. Otherwise it leads the second line.
+    var showsNextStepColumn = false
     /// Offered on right-click for my own pull requests. The argument is the new draft state.
     var setDraft: ((Bool) -> Void)?
     @Environment(\.openURL) private var openURL
@@ -21,13 +26,22 @@ struct PullRequestRow: View {
                         .textStyle(.control)
                         .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
-                    detail.lineLimit(2)
+                    (showsNextStepColumn ? facts : Text("\(nextSteps)   \(facts)"))
+                        .lineHeight(.exact(points: 20))
+                        .lineLimit(2)
                 }
-                Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if showsNextStepColumn {
+                    nextSteps
+                        .lineHeight(.exact(points: 20))
+                        .lineLimit(2)
+                        .frame(width: Self.nextStepColumnWidth, alignment: .leading)
+                }
                 Text(snapshot.age(of: pullRequest))
                     .textStyle(.label)
                     .foregroundStyle(quiet)
                     .padding(.top, 2)
+                    .frame(width: Self.ageColumnWidth, alignment: .trailing)
             }
             .contentShape(Rectangle())
         }
@@ -52,15 +66,16 @@ struct PullRequestRow: View {
         isParked ? Palette.lineStrong : Palette.inkMuted
     }
 
-    /// The next step, then the quiet facts.
-    private var detail: some View {
-        let nextSteps = Text(snapshot.nextStepsText(for: pullRequest))
-            .font(TextStyle.small.font)
+    private var nextSteps: Text {
+        Text(snapshot.nextStepsText(for: pullRequest))
+            .font((showsNextStepColumn ? TextStyle.control : .small).font)
             .foregroundStyle(isParked ? Palette.lineStrong : Palette.ink)
-        let facts = Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
+    }
+
+    private var facts: Text {
+        Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
             .font(TextStyle.label.font)
             .foregroundStyle(quiet)
-        return Text("\(nextSteps)   \(facts)").lineHeight(.exact(points: 20))
     }
 
     /// One vertical hairline for each pull request beneath this one in its stack.

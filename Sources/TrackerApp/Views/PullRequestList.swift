@@ -19,6 +19,7 @@ struct PullRequestList: View {
     let rows: [PullRequestListRow]
     let snapshot: Snapshot
     let emptyText: String
+    var showsNextStepColumn = false
     var setDraft: ((Bool, PullRequest) -> Void)?
 
     var body: some View {
@@ -31,7 +32,7 @@ struct PullRequestList: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(rows) { row in
                     PullRequestRow(
-                        pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth,
+                        pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth, showsNextStepColumn: showsNextStepColumn,
                         setDraft: setDraft.map { setDraft in { setDraft($0, row.pullRequest) } }
                     )
                     Rule()
