@@ -48,14 +48,14 @@ struct PullRequestRow: View {
         .overlay(alignment: .leading) { stackGuides }
     }
 
-    /// The number, the repository, a dot in the colour of its CI, then the other facts.
+    /// The number, the repository, then the other facts. The dot between them takes the colour of its CI, and is a plain separator when it has none.
     private var facts: Text {
-        var line = Text("\(Text(verbatim: "#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(pullRequest.repository)")
-        if let color = pullRequest.checks.color {
-            line = Text("\(line) \(Text(verbatim: "●").foregroundStyle(isParked ? Palette.lineStrong : color))")
+        let line = Text("\(Text(verbatim: "#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(pullRequest.repository)")
+        let rest = snapshot.facts(about: pullRequest).joined(separator: " · ")
+        guard let color = pullRequest.checks.color else {
+            return rest.isEmpty ? line : Text("\(line) · \(rest)")
         }
-        let rest = snapshot.facts(about: pullRequest)
-        return rest.isEmpty ? line : Text("\(line) · \(rest.joined(separator: " · "))")
+        return Text("\(line) \(Text(verbatim: "●").foregroundStyle(isParked ? Palette.lineStrong : color)) \(rest)")
     }
 
     /// A draft with nothing for me to do. The whole row drops to the disabled grey.
