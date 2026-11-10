@@ -4,6 +4,8 @@ import TrackerCore
 
 /// One pull request: status glyph, title, who has the ball, and its age. A click opens it on GitHub.
 struct PullRequestRow: View {
+    /// As tall as the title and the line under it together.
+    private static let glyphSize: CGFloat = 40
     private static let nextStepColumnWidth: CGFloat = 240
     private static let ageColumnWidth: CGFloat = 32
 
@@ -20,7 +22,7 @@ struct PullRequestRow: View {
         let status = snapshot.status(of: pullRequest)
         Button { openURL(pullRequest.url) } label: {
             HStack(alignment: .top, spacing: Space.s3) {
-                Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color).padding(.top, 2)
+                Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color, size: Self.glyphSize)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
