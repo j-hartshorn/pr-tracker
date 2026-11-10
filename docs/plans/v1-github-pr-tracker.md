@@ -69,7 +69,7 @@ gh auth token ──▶ GitHubClient ──▶ Snapshot ──▶ diff(old, new)
                                    Store (@Observable) ──▶ menu bar + window
 ```
 
-- **`GitHubClient`**: one GraphQL request per poll with two searches (`author:@me` and `user-review-requested:@me`), decoded into `PullRequest` values. Also the two draft mutations.
+- **`GitHubClient`**: each poll makes one cheap overview request with two searches (`author:@me` and `user-review-requested:@me`). It makes a second request for review details only when one of my PRs changed. Also the two draft mutations. See "GitHub API cost" below.
 - **`Snapshot`**: the PRs from one poll. Saved as JSON in Application Support so a restart doesn't re-notify.
 - **`diff(old, new) -> [Event]`**: a pure function. This is where the notification rules live, and it is the most heavily tested part.
 - **`stacks(from:)`**: a pure function from PRs to a forest. It builds trees, not just chains, so one PR can have several PRs stacked on it. It matches branches within one repository only, so forks don't create false stacks.
@@ -96,6 +96,22 @@ No plugin layer for Linear yet. Events and the store are already source-neutral,
 GitHub computes `mergeable` lazily and often returns `UNKNOWN`. An `UNKNOWN` keeps the previous value, so it never causes or hides a conflict notification.
 
 Review-posted events are collapsed to one notification per PR and reviewer per poll, so a reviewer who posts five separate comments sends one notification, not five.
+
+## GitHub API cost
+
+GitHub allows 5,000 GraphQL points an hour, shared with `gh` and every other tool on the token. It charges for the page sizes a query asks for, not for what comes back.
+
+| Query | When | Measured cost |
+| --- | --- | --- |
+| Overview | Every poll | 2 points |
+| Details | Only for my PRs that are new or whose `updatedAt` changed | 1 point for one PR, 20 for all 19 |
+
+That is about 120 points an hour when nothing changes. The first version fetched everything on every poll, at 210 points, and used up the hour's budget in about 24 minutes.
+
+- **Overview** has the fields that change without the PR being updated: checks, mergeability and requested reviewers.
+- **Details** has reviews, review threads and review request times. These only change when the PR is updated, so the last snapshot's copy is reused until then.
+- **The Refresh button** fetches every PR's details again, in case GitHub changes something without touching `updatedAt`.
+- **When GitHub says the limit was hit**, the app sends nothing until the reset time GitHub gives, and says so in the window.
 
 ## Next steps
 

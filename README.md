@@ -8,6 +8,8 @@ A macOS menu bar app that tracks the GitHub pull requests I'm involved with and 
 
 It polls GitHub every 60 seconds with the token from the `gh` CLI. It stores no credentials.
 
+A poll costs 2 of GitHub's 5,000 GraphQL points an hour, plus about 1 for each pull request that changed. If GitHub says the limit was hit, the app stops until the reset time.
+
 ## Run
 
 Needs macOS 26 or later, Swift 6.2 or later, and `gh` logged in (`gh auth login`). Xcode is not needed.
@@ -38,7 +40,7 @@ Each layer only knows about the ones below it.
 | --- | --- |
 | `Sources/TrackerCore` | The domain. No interface code. |
 | `Sources/TrackerCore/Model` | `PullRequest`, `Review` and `Snapshot` (everything one poll learned). |
-| `Sources/TrackerCore/GitHub` | The GraphQL query, its decoding, and the `gh` token. |
+| `Sources/TrackerCore/GitHub` | The two GraphQL queries (a cheap overview and the costly details), their decoding, rate limits, and the `gh` token. |
 | `Sources/TrackerCore/Rules` | Pure functions over snapshots: which events to notify about, the next step of a pull request, and how pull requests stack. |
 | `Sources/Hairline` | The design system in SwiftUI: tokens and components. It knows nothing about pull requests. |
 | `Sources/TrackerApp` | The app: the poll loop (`AppModel`), notifications, and the views. |
@@ -54,7 +56,7 @@ Each layer only knows about the ones below it.
 - **Who has the ball, and what needs attention**: `Rules/NextStep.swift`, with `NextStepTests`.
 - **What red, amber and green mean**: `Rules/Status.swift`.
 - **The words for a next step**: `TrackerApp/Presentation/Snapshot+Facts.swift`.
-- **What data is fetched**: `GitHub/SnapshotQuery.swift`. Add the field to the query, the decoding and `PullRequest`.
+- **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift`. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
 - **The sections of the window**: `TrackerApp/Views/MainWindow.swift`.
 - **Colours, type and spacing**: `docs/design-system` first, then `Sources/Hairline`.
 

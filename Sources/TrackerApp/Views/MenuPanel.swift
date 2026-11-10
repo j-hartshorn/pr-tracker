@@ -37,7 +37,7 @@ public struct MenuPanel: View {
                 }
                 .buttonStyle(.hairline(size: .small))
                 Spacer()
-                Button("Refresh") { Task { await model.refresh() } }
+                Button("Refresh") { Task { await model.refresh(everything: true) } }
                     .buttonStyle(.hairline(.quiet, size: .small))
                     .disabled(model.isRefreshing)
                 Button("Quit") { NSApplication.shared.terminate(nil) }

@@ -12,6 +12,8 @@ public final class AppModel {
     /// Why the last refresh failed, or nil if it worked.
     public private(set) var lastError: String?
     public private(set) var isRefreshing = false
+    /// Set when GitHub says its rate limit was hit. Nothing is sent before this time.
+    private var pausedUntil: Date?
 
     private let client: GitHubClient
     private let file: SnapshotFile
@@ -33,12 +35,13 @@ public final class AppModel {
         }
     }
 
-    public func refresh() async {
-        guard !isRefreshing else { return }
+    /// A poll only fetches the details of pull requests that changed. `everything` fetches them all again.
+    public func refresh(everything: Bool = false) async {
+        guard !isRefreshing, pausedUntil.map({ $0 <= Date() }) ?? true else { return }
         isRefreshing = true
         defer { isRefreshing = false }
         do {
-            let new = try await client.fetchSnapshot().carryingMergeability(from: snapshot)
+            let new = try await client.fetchSnapshot(reusing: everything ? nil : snapshot).carryingMergeability(from: snapshot)
             let events = new.events(since: snapshot)
             snapshot = new
             lastError = nil
@@ -46,6 +49,7 @@ public final class AppModel {
             for event in events { await notify(event) }
             try file.save(new)
         } catch {
+            if case GitHubError.rateLimited(let until) = error { pausedUntil = until }
             lastError = error.localizedDescription
             log.error("refresh failed: \(error.localizedDescription, privacy: .public)")
         }

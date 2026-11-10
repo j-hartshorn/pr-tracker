@@ -45,7 +45,7 @@ public struct MainWindow: View {
                     .foregroundStyle(Palette.inkMuted)
             }
             Button(model.isRefreshing ? "Refreshing" : "Refresh") {
-                Task { await model.refresh() }
+                Task { await model.refresh(everything: true) }
             }
             .buttonStyle(.hairline(.quiet, size: .small))
             .disabled(model.isRefreshing)
