@@ -52,7 +52,7 @@ Put a rule in `Rules` with a test, not in a view.
 - The budget is 5,000 GraphQL points an hour, shared with `gh`. GitHub charges for the page sizes a query asks for, not for what comes back.
 - `OverviewQuery` runs every poll and costs 2 points. `DetailsQuery` runs only for pull requests whose `updatedAt` changed, at about 1 point each.
 - Before changing a query, measure it: add `rateLimit { cost }` and run it with `gh api graphql`. A version that asked for review threads on every poll cost 210 points and used the hour's budget in 24 minutes.
-- **Never run the draft mutations against a real pull request.** They notify other people. The live tests send them with a made-up id.
+- The app only reads from GitHub. Actions on a pull request are done on GitHub.
 
 ## Design system
 
@@ -67,7 +67,6 @@ Put a rule in `Rules` with a test, not in a view.
 ## Not yet verified
 
 - Clicking a notification opens its link.
-- The draft actions against a real pull request, and the right-click menu that offers them.
 - The menu bar icon's colour on a dark menu bar.
 - That resolving a review thread changes `updatedAt`. If it does not, "answer N comments" stays until the pull request next changes or Refresh is pressed.
 - The pause when GitHub reports a rate limit. It has unit tests but has not fired for real.

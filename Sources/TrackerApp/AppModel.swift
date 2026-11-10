@@ -54,17 +54,4 @@ public final class AppModel {
             log.error("refresh failed: \(error.localizedDescription, privacy: .public)")
         }
     }
-
-    public func setDraft(_ isDraft: Bool, for pullRequest: PullRequest) async {
-        do {
-            try await client.setDraft(isDraft, pullRequestID: pullRequest.id)
-            // Shown at once. The next poll brings the reviewers and checks that follow from the change.
-            if let index = snapshot?.authored.firstIndex(where: { $0.id == pullRequest.id }) {
-                snapshot?.authored[index].isDraft = isDraft
-            }
-        } catch {
-            lastError = error.localizedDescription
-            log.error("setting draft failed: \(error.localizedDescription, privacy: .public)")
-        }
-    }
 }

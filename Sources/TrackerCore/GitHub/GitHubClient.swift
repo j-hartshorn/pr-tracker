@@ -19,15 +19,6 @@ public struct GitHubClient: Sendable {
         return overview.withDetails(details, reusing: previous)
     }
 
-    public func setDraft(_ isDraft: Bool, pullRequestID: String) async throws {
-        let mutation = isDraft ? "convertPullRequestToDraft" : "markPullRequestReadyForReview"
-        let query = "mutation($id: ID!) { \(mutation)(input: {pullRequestId: $id}) { pullRequest { id } } }"
-        let data = try await send(query: query, variables: ["id": pullRequestID])
-        if let message = try JSONDecoder().decode(GraphQL.Response<EmptyPayload>.self, from: data).errors?.first?.message {
-            throw GitHubError.graphQL(message)
-        }
-    }
-
     private func send(query: String, variables: some Encodable) async throws -> Data {
         var request = URLRequest(url: Self.endpoint)
         request.httpMethod = "POST"
@@ -50,5 +41,3 @@ private struct GraphQLRequest<Variables: Encodable>: Encodable {
     var query: String
     var variables: Variables
 }
-
-private struct EmptyPayload: Decodable {}

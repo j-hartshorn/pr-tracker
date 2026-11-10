@@ -19,17 +19,4 @@ struct GitHubClientLiveTests {
             #expect(pr.waitingSince == before.waitingSince)
         }
     }
-
-    // A made-up id, so GitHub checks both mutations against its schema without changing anything.
-    @Test(arguments: [true, false])
-    func setDraftReportsThatThePullRequestDoesNotExist(isDraft: Bool) async {
-        do {
-            try await GitHubClient().setDraft(isDraft, pullRequestID: "PR_does_not_exist")
-            Issue.record("expected GitHub to reject the id")
-        } catch let GitHubError.graphQL(message) {
-            #expect(message.contains("Could not resolve to a node"))
-        } catch {
-            Issue.record("unexpected error: \(error)")
-        }
-    }
 }

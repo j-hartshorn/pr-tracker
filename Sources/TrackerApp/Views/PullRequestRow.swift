@@ -2,7 +2,7 @@ import Hairline
 import SwiftUI
 import TrackerCore
 
-/// One pull request: status glyph, title, who has the ball, and its age. A click opens it on GitHub.
+/// One pull request: status glyph, title, who has the ball, and its age.
 struct PullRequestRow: View {
     /// The height of the title line (20) and the facts line (16). The glyph's own margin then puts its square between the top of the title's capitals and the baseline of the facts.
     private static let glyphSize: CGFloat = 36
@@ -14,13 +14,10 @@ struct PullRequestRow: View {
     var depth = 0
     /// The next step gets its own column where there is room. Otherwise it leads the second line.
     var showsNextStepColumn = false
-    /// Offered on right-click for my own pull requests. The argument is the new draft state.
-    var setDraft: ((Bool) -> Void)?
-    @Environment(\.openURL) private var openURL
 
     var body: some View {
         let status = snapshot.status(of: pullRequest)
-        Button { openURL(pullRequest.url) } label: {
+        PullRequestLink(pullRequest: pullRequest) {
             HStack(alignment: .top, spacing: Space.s3) {
                 Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color, size: Self.glyphSize)
                     // The glyph has a margin of its own, so it sits one step closer to the text than the columns do to each other.
@@ -47,14 +44,6 @@ struct PullRequestRow: View {
                     .foregroundStyle(quiet)
                     .padding(.top, 2)
                     .frame(width: Self.ageColumnWidth, alignment: .trailing)
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .pointerStyle(.link)
-        .contextMenu {
-            if let setDraft, pullRequest.author == snapshot.viewer {
-                Button(pullRequest.isDraft ? "Mark ready" : "Convert to draft") { setDraft(!pullRequest.isDraft) }
             }
         }
         .padding(.vertical, Space.s2)

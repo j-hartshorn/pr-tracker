@@ -7,10 +7,10 @@ A local macOS app in Swift that tracks the GitHub PRs I'm involved with and noti
 | Topic | Decision |
 | --- | --- |
 | App shape | Menu bar item plus a full window. The window is one page with two sections: Needs attention, then Mine as stacks. |
-| Rows | Each row leads with its next step: who has the ball. A click opens GitHub. A right-click offers the draft actions. |
+| Rows | Each row leads with its next step: who has the ball. A click opens GitHub. A right-click copies the link. |
 | Needs addressing | A review needs me when a thread is unanswered, or when a reviewer who did not approve has seen no commit, reply or new request since. |
 | Stacks | Inferred from base-branch chains. A PR whose base branch is another open PR's head branch is stacked on it. |
-| Drafts | "Mark ready" and "Convert to draft" on right-click, with a confirmation. |
+| Drafts | Shown greyed. Marking ready and converting to draft are done on GitHub: the app only reads. |
 | Review requests | A PR is mine only if I'm requested by name (`user-review-requested:@me`). Team requests, with or without another person named, are ignored in v1. |
 | Bot reviews | A bot review notifies only when it has comments. Every bot review shows as a quiet line on the PR row, separate from reviews by people. |
 | Status colours | Hairline gains three status colours (failing, attention, ready), used on status glyphs only. |
@@ -39,7 +39,7 @@ These are my defaults. Change any of them before I start.
 
 - CoreText registers the `.woff2` files directly (`Iosevka`, `Iosevka-Aile`). No TTF conversion needed.
 - `swift test` with Swift Testing works on Command Line Tools alone (Swift 6.4).
-- `gh` is authed as `j-hartshorn` with `repo` scope, which covers reads and the draft mutations.
+- `gh` is authed as `j-hartshorn` with `repo` scope, which covers the reads.
 - Live data: 19 open PRs authored by me, 1 requested of me by name, and 1 that names the team plus someone else (correctly excluded by `user-review-requested:@me`).
 - Live data: of the reviews by people on my last 40 PRs, 18 are approvals and 42 are comment-only. GitHub creates a comment-only review for each reply in a thread, so one conversation can produce several review ids.
 - Live data: Copilot posted 14 reviews on my last 40 PRs, and 9 of them had no comments.
@@ -51,13 +51,12 @@ These are my defaults. Change any of them before I start.
 - **`@State` needs Xcode.** On this SDK it is a macro whose compiler plugin does not ship with the Command Line Tools. The app keeps state in `@Observable` classes held with `let`.
 - **Test builds are flaky without Xcode.** Some builds cannot find the Testing macro plugin. `scripts/check.sh` builds again when that happens.
 - **The window does not open at launch**, because the app has no Dock icon. It opens from the menu bar item.
-- **The draft actions ask first.** Marking ready notifies reviewers, so a stray click should not do it.
+- **The app only reads.** It had draft actions on right-click, but in use it was simpler to do them on GitHub. A right-click now copies the link.
 - **Minimum macOS is 26**, for exact line heights in SwiftUI.
 
 ## Not yet verified
 
 - **Clicking a notification opens the link.** The code is in place, but only a person can click one.
-- **The draft actions against a real pull request.** GitHub accepts both mutations for a made-up id, so their shape is right. Running them for real would notify colleagues, so that is left to me.
 
 ## Architecture
 
@@ -69,7 +68,7 @@ gh auth token ──▶ GitHubClient ──▶ Snapshot ──▶ diff(old, new)
                                    Store (@Observable) ──▶ menu bar + window
 ```
 
-- **`GitHubClient`**: each poll makes one cheap overview request with two searches (`author:@me` and `user-review-requested:@me`). It makes a second request for review details only when one of my PRs changed. Also the two draft mutations. See "GitHub API cost" below.
+- **`GitHubClient`**: each poll makes one cheap overview request with two searches (`author:@me` and `user-review-requested:@me`). It makes a second request for review details only when one of my PRs changed. See "GitHub API cost" below.
 - **`Snapshot`**: the PRs from one poll. Saved as JSON in Application Support so a restart doesn't re-notify.
 - **`diff(old, new) -> [Event]`**: a pure function. This is where the notification rules live, and it is the most heavily tested part.
 - **`stacks(from:)`**: a pure function from PRs to a forest. It builds trees, not just chains, so one PR can have several PRs stacked on it. It matches branches within one repository only, so forks don't create false stacks.

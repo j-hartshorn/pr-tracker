@@ -70,18 +70,7 @@ public struct MainWindow: View {
             }
             .padding(.bottom, Space.s2)
             Rule()
-            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText, showsNextStepColumn: true, setDraft: setDraft)
+            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText, showsNextStepColumn: true)
         }
-    }
-
-    /// Asks first, because both directions are visible to other people.
-    private func setDraft(_ isDraft: Bool, for pr: PullRequest) {
-        let alert = NSAlert()
-        alert.messageText = isDraft ? "Convert #\(pr.number) to a draft?" : "Mark #\(pr.number) ready for review?"
-        alert.informativeText = isDraft ? "It cannot merge until it is marked ready again." : "Its reviewers will be notified."
-        alert.addButton(withTitle: isDraft ? "Convert to draft" : "Mark ready")
-        alert.addButton(withTitle: "Cancel")
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        Task { await model.setDraft(isDraft, for: pr) }
     }
 }
