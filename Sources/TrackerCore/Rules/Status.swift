@@ -6,7 +6,7 @@ public enum Status: Int, Comparable, Sendable {
     case failing
     /// A review is mine to do or to answer.
     case attention
-    /// It can merge.
+    /// It is approved and can merge, now or when the pull request beneath it does.
     case ready
     /// The ball is with someone else.
     case waiting
@@ -19,8 +19,8 @@ extension NextStep {
         switch self {
         case .fixChecks, .resolveConflicts: .failing
         case .review, .answerComments, .respond, .requestReview: .attention
-        case .merge: .ready
-        case .waitingOnReviewers, .waitingOnChecks, .waitingOnStack, .draft: .waiting
+        case .merge, .waitingOnStack: .ready
+        case .waitingOnReviewers, .waitingOnChecks, .draft: .waiting
         }
     }
 }
@@ -30,8 +30,9 @@ extension Snapshot {
         nextSteps(for: pr).map(\.status).min() ?? .waiting
     }
 
+    /// The most urgent status among the pull requests that need me.
     public var mostUrgentStatus: Status {
-        (authored + reviewRequested).map(status(of:)).min() ?? .waiting
+        statusesNeedingAttention.first ?? .waiting
     }
 
     /// One status for each pull request that needs me, most urgent first.

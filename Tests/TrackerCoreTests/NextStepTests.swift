@@ -192,7 +192,16 @@ import Testing
         #expect(Snapshot.fixture().status(of: .fixture(isDraft: true)) == .waiting)
     }
 
-    @Test func mostUrgentStatusIsTheWorstAcrossEverything() {
+    @Test func approvedAndWaitingOnItsStackIsReadyButDoesNotNeedMe() {
+        let bottom = PullRequest.fixture(1, head: "bottom", requestedReviewers: ["bob"])
+        let top = PullRequest.fixture(2, base: "bottom", reviewDecision: .approved)
+        let snapshot = Snapshot.fixture(authored: [bottom, top])
+        #expect(snapshot.status(of: top) == .ready)
+        #expect(snapshot.needingAttention.isEmpty)
+        #expect(snapshot.mostUrgentStatus == .waiting)
+    }
+
+    @Test func mostUrgentStatusIsTheWorstAmongThoseThatNeedMe() {
         let theirs = PullRequest.fixture(9, author: "alice")
         let waiting = PullRequest.fixture(1, requestedReviewers: ["bob"])
         #expect(Snapshot.fixture().mostUrgentStatus == .waiting)
