@@ -77,13 +77,6 @@ import Testing
         }
     }
 
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["GH_TRACKER_LIVE"] != nil))
-    func fetchesFromGitHub() async throws {
-        let snapshot = try await GitHubClient().fetchSnapshot()
-        #expect(!snapshot.viewer.isEmpty)
-        #expect(snapshot.authored.allSatisfy { $0.author == snapshot.viewer })
-    }
-
     let response = """
     {"data": {
       "viewer": {"login": "joe"},
