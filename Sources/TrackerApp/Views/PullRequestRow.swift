@@ -23,6 +23,8 @@ struct PullRequestRow: View {
         Button { openURL(pullRequest.url) } label: {
             HStack(alignment: .top, spacing: Space.s3) {
                 Glyph(status.glyph, color: isParked ? Palette.lineStrong : status.color, size: Self.glyphSize)
+                    // The glyph has a margin of its own, so it sits one step closer to the text than the columns do to each other.
+                    .padding(.trailing, -Space.s1)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(pullRequest.title)
                         .textStyle(.control)
