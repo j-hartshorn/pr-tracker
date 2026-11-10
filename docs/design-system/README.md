@@ -88,6 +88,12 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 - Off: a `stroke-mark` outline in `line-strong`. On: an `ink` fill with a `bg` tick in `stroke-mark`, square ends.
 - The label says what is true when it is on, in sentence case: "Open at login". Help text goes under it in `ink-muted`.
 
+## Choice
+
+- A short row of options where one is current, such as an interval. It looks like the nav (`hl-nav`): options are `ink-muted`, and the current one is `ink` with a 2px `ink` underline.
+- Options are 24px apart. A label goes above the row, and help text under it in `ink-muted`.
+- Use it for up to about six short options. It is a setting, not an action, so it never takes the accent.
+
 ## Writing
 
 - Short and plain. Use verbs on buttons: "Save changes", not "Submit".

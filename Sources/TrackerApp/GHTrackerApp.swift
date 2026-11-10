@@ -43,6 +43,7 @@ public struct GHTrackerApp: App {
 
         Settings {
             SettingsView()
+                .environment(model)
                 .environment(launchAtLogin)
                 .containerBackground(Palette.bg, for: .window)
                 .joinsDockWhileOpen(model)

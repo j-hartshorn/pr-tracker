@@ -2,6 +2,7 @@ import Hairline
 import SwiftUI
 
 public struct SettingsView: View {
+    @Environment(AppModel.self) private var model
     @Environment(LaunchAtLogin.self) private var launchAtLogin
 
     public init() {}
@@ -17,6 +18,13 @@ public struct SettingsView: View {
                 }
             }
             .toggleStyle(.hairlineCheckbox)
+            VStack(alignment: .leading, spacing: Space.s1) {
+                Text("Refresh every").textStyle(.control).foregroundStyle(Palette.ink)
+                Choice(AppModel.refreshChoices, selection: Binding(get: { model.refreshMinutes }, set: { model.refreshMinutes = $0 })) { "\($0) min" }
+                Text("How often PR Tracker asks GitHub for changes.")
+                    .textStyle(.small)
+                    .foregroundStyle(Palette.inkMuted)
+            }
             if launchAtLogin.status == .requiresApproval {
                 AlertBox(.info, title: "Waiting for your approval", detail: "Allow PR Tracker in System Settings, under General, then Login Items.")
             }

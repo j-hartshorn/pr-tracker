@@ -7,7 +7,7 @@ A macOS menu bar app that tracks the GitHub pull requests I'm involved with and 
 - **Dock**: while the window is open, the three bars of the icon take the colours of the three most urgent pull requests that need me.
 - **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link, with a brief "Copied" toast.
 
-It polls GitHub every 60 seconds with the token from the `gh` CLI. It stores no credentials.
+It polls GitHub every minute, or as often as Settings says, with the token from the `gh` CLI. It stores no credentials.
 
 A poll costs 2 of GitHub's 5,000 GraphQL points an hour, plus about 1 for each pull request that changed. If GitHub says the limit was hit, the app stops until the reset time.
 
@@ -20,7 +20,7 @@ Needs macOS 26 or later, Swift 6.2 or later, and `gh` logged in (`gh auth login`
 open build/gh-tracker.app
 ```
 
-Open the window from the menu bar item. While the window is open the app is in the Dock and has a menu bar, with Settings (⌘,) for opening at login and View › Refresh (⌘R). The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
+Open the window from the menu bar item. While the window is open the app is in the Dock and has a menu bar, with Settings (⌘,) for opening at login and how often to refresh, and View › Refresh (⌘R). The first run asks for permission to send notifications, and sends none until the second poll: the first poll is the baseline.
 
 ## Develop
 
