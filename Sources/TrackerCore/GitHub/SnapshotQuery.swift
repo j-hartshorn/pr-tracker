@@ -20,13 +20,24 @@ enum SnapshotQuery {
       headRepository { nameWithOwner }
       baseRefName headRefName
       mergeable reviewDecision
-      commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
-      reviewRequests(first: 20) {
-        nodes { requestedReviewer { ... on User { login } ... on Team { slug } ... on Bot { login } ... on Mannequin { login } } }
+      commits(last: 1) { nodes { commit { committedDate statusCheckRollup { state } } } }
+      reviewRequests(first: 20) { nodes { requestedReviewer { ...ReviewerName } } }
+      timelineItems(last: 30, itemTypes: [REVIEW_REQUESTED_EVENT]) {
+        nodes { ... on ReviewRequestedEvent { createdAt requestedReviewer { ...ReviewerName } } }
       }
       reviews(last: 30) {
         nodes { id state submittedAt url author { __typename login } comments { totalCount } }
       }
+      reviewThreads(first: 100) {
+        nodes { isResolved comments(last: 1) { nodes { author { __typename login } } } }
+      }
+    }
+
+    fragment ReviewerName on RequestedReviewer {
+      ... on User { login }
+      ... on Team { slug }
+      ... on Bot { login }
+      ... on Mannequin { login }
     }
     """
 
@@ -82,6 +93,7 @@ enum SnapshotQuery {
     private struct CommitNode: Decodable {
         struct Commit: Decodable {
             struct Rollup: Decodable { var state: String }
+            var committedDate: Date
             var statusCheckRollup: Rollup?
         }
         var commit: Commit
@@ -91,8 +103,25 @@ enum SnapshotQuery {
         struct Reviewer: Decodable {
             var login: String?
             var slug: String?
+            var name: String? { login ?? slug }
         }
         var requestedReviewer: Reviewer?
+        /// Only on the timeline's request events.
+        var createdAt: Date?
+    }
+
+    private struct ThreadNode: Decodable {
+        var isResolved: Bool
+        var comments: Connection<Comment>
+
+        struct Comment: Decodable {
+            var author: Actor?
+        }
+
+        func isUnanswered(byAuthor author: String) -> Bool {
+            guard !isResolved, let last = comments.nodes.compactMap({ $0 }).last else { return false }
+            return last.author?.__typename != "Bot" && last.author?.login != author
+        }
     }
 
     private struct ReviewNode: Decodable {
@@ -133,27 +162,39 @@ enum SnapshotQuery {
         var reviewDecision: String?
         var commits: Connection<CommitNode>
         var reviewRequests: Connection<ReviewRequest>
+        var timelineItems: Connection<ReviewRequest>
         var reviews: Connection<ReviewNode>
+        var reviewThreads: Connection<ThreadNode>
 
         var pullRequest: PullRequest {
-            PullRequest(
+            let author = author?.login ?? "ghost"
+            let lastCommit = commits.nodes.compactMap { $0 }.last?.commit
+            let requestedReviewers = reviewRequests.nodes.compactMap { $0?.requestedReviewer?.name }
+            return PullRequest(
                 id: id,
                 number: number,
                 title: title,
                 url: url,
                 repository: repository.nameWithOwner,
-                author: author?.login ?? "ghost",
+                author: author,
                 isDraft: isDraft,
                 baseRef: baseRefName,
                 headRef: headRefName,
                 isFromFork: headRepository?.nameWithOwner != repository.nameWithOwner,
                 updatedAt: updatedAt,
                 mergeability: Mergeability(graphQL: mergeable),
-                checks: Checks(graphQL: commits.nodes.compactMap { $0 }.last?.commit.statusCheckRollup?.state),
+                checks: Checks(graphQL: lastCommit?.statusCheckRollup?.state),
                 reviewDecision: reviewDecision.flatMap(ReviewDecision.init(graphQL:)),
-                requestedReviewers: reviewRequests.nodes.compactMap { $0?.requestedReviewer }.compactMap { $0.login ?? $0.slug },
-                reviews: reviews.nodes.compactMap { $0?.review }
+                requestedReviewers: requestedReviewers,
+                waitingSince: requestedReviewers.compactMap(lastRequested).min(),
+                reviews: reviews.nodes.compactMap { $0?.review },
+                unansweredThreadCount: reviewThreads.nodes.compactMap { $0 }.count { $0.isUnanswered(byAuthor: author) },
+                lastCommitAt: lastCommit?.committedDate
             )
+        }
+
+        private func lastRequested(_ reviewer: String) -> Date? {
+            timelineItems.nodes.compactMap { $0 }.filter { $0.requestedReviewer?.name == reviewer }.compactMap(\.createdAt).max()
         }
     }
 }

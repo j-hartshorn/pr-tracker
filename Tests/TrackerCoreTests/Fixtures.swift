@@ -14,7 +14,10 @@ extension PullRequest {
         checks: Checks = .passing,
         reviewDecision: ReviewDecision? = nil,
         requestedReviewers: [String] = [],
-        reviews: [Review] = []
+        waitingSince: Date? = nil,
+        reviews: [Review] = [],
+        unansweredThreads: Int = 0,
+        lastCommitAt: Date? = nil
     ) -> PullRequest {
         PullRequest(
             id: "\(repository)#\(number)",
@@ -32,7 +35,10 @@ extension PullRequest {
             checks: checks,
             reviewDecision: reviewDecision,
             requestedReviewers: requestedReviewers,
-            reviews: reviews
+            waitingSince: waitingSince,
+            reviews: reviews,
+            unansweredThreadCount: unansweredThreads,
+            lastCommitAt: lastCommitAt
         )
     }
 }
@@ -43,14 +49,15 @@ extension Review {
         by author: String = "alice",
         isBot: Bool = false,
         _ state: State = .commented,
-        comments: Int = 0
+        comments: Int = 0,
+        at submittedAt: Date = Date(timeIntervalSince1970: 1_700_000_000)
     ) -> Review {
         Review(
             id: id,
             author: author,
             isBot: isBot,
             state: state,
-            submittedAt: Date(timeIntervalSince1970: 1_700_000_000),
+            submittedAt: submittedAt,
             url: URL(string: "https://github.com/acme/widgets/pull/1#pullrequestreview-\(id)")!,
             commentCount: comments
         )

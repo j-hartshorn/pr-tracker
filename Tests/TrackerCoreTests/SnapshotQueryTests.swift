@@ -28,6 +28,19 @@ import Testing
         #expect(pr.reviewDecision == .changesRequested)
         #expect(pr.requestedReviewers == ["alice", "platform"])
         #expect(pr.updatedAt == ISO8601DateFormatter().date(from: "2026-11-01T10:00:00Z"))
+        #expect(pr.lastCommitAt == ISO8601DateFormatter().date(from: "2026-11-01T08:00:00Z"))
+    }
+
+    @Test func waitingSinceIsTheOldestRequestStillOpen() throws {
+        // alice was asked twice and platform once. bob was asked earliest but is no longer requested.
+        let pr = try SnapshotQuery.decode(Data(response.utf8), fetchedAt: Self.fetchedAt).authored[0]
+        #expect(pr.waitingSince == ISO8601DateFormatter().date(from: "2026-10-30T12:00:00Z"))
+    }
+
+    @Test func countsOpenThreadsWhereAnotherPersonSpokeLast() throws {
+        // Of five threads, one is resolved, one ends with the author and one ends with a bot.
+        let pr = try SnapshotQuery.decode(Data(response.utf8), fetchedAt: Self.fetchedAt).authored[0]
+        #expect(pr.unansweredThreadCount == 2)
     }
 
     @Test func decodesReviewsFromPeopleAndBots() throws {
@@ -55,9 +68,11 @@ import Testing
           "isDraft": true, "updatedAt": "2026-11-01T10:00:00Z", "author": null,
           "repository": {"nameWithOwner": "acme/widgets"}, "headRepository": null,
           "baseRefName": "main", "headRefName": "patch-1", "mergeable": "UNKNOWN", "reviewDecision": null,
-          "commits": {"nodes": [{"commit": {"statusCheckRollup": null}}]},
+          "commits": {"nodes": [{"commit": {"committedDate": "2026-11-01T08:00:00Z", "statusCheckRollup": null}}]},
           "reviewRequests": {"nodes": [{"requestedReviewer": null}]},
-          "reviews": {"nodes": []}
+          "timelineItems": {"nodes": [{"createdAt": "2026-11-01T08:00:00Z", "requestedReviewer": null}, {}]},
+          "reviews": {"nodes": []},
+          "reviewThreads": {"nodes": [{"isResolved": false, "comments": {"nodes": []}}]}
         }]}, "reviewRequested": {"nodes": []}}, "errors": [{"message": "Resource protected by organization SAML enforcement."}]}
         """
         let pr = try #require(try SnapshotQuery.decode(Data(json.utf8), fetchedAt: Self.fetchedAt).authored.first)
@@ -68,6 +83,8 @@ import Testing
         #expect(pr.checks == .none)
         #expect(pr.reviewDecision == nil)
         #expect(pr.requestedReviewers.isEmpty)
+        #expect(pr.waitingSince == nil)
+        #expect(pr.unansweredThreadCount == 0)
     }
 
     @Test func throwsTheGraphQLErrorWhenThereIsNoData() {
@@ -88,8 +105,21 @@ import Testing
         "headRepository": {"nameWithOwner": "acme/widgets"},
         "baseRefName": "main", "headRefName": "joe/thing",
         "mergeable": "CONFLICTING", "reviewDecision": "CHANGES_REQUESTED",
-        "commits": {"nodes": [{"commit": {"statusCheckRollup": {"state": "FAILURE"}}}]},
+        "commits": {"nodes": [{"commit": {"committedDate": "2026-11-01T08:00:00Z", "statusCheckRollup": {"state": "FAILURE"}}}]},
         "reviewRequests": {"nodes": [{"requestedReviewer": {"login": "alice"}}, {"requestedReviewer": {"slug": "platform"}}]},
+        "timelineItems": {"nodes": [
+          {"createdAt": "2026-10-29T12:00:00Z", "requestedReviewer": {"login": "bob"}},
+          {"createdAt": "2026-10-29T13:00:00Z", "requestedReviewer": {"login": "alice"}},
+          {"createdAt": "2026-10-30T12:00:00Z", "requestedReviewer": {"slug": "platform"}},
+          {"createdAt": "2026-10-31T12:00:00Z", "requestedReviewer": {"login": "alice"}}
+        ]},
+        "reviewThreads": {"nodes": [
+          {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
+          {"isResolved": false, "comments": {"nodes": [{"author": null}]}},
+          {"isResolved": true, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
+          {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "joe"}}]}},
+          {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "Bot", "login": "copilot-pull-request-reviewer"}}]}}
+        ]},
         "reviews": {"nodes": [
           {"id": "R_1", "state": "CHANGES_REQUESTED", "submittedAt": "2026-11-01T09:00:00Z", "url": "https://github.com/acme/widgets/pull/42#pullrequestreview-1", "author": {"__typename": "User", "login": "alice"}, "comments": {"totalCount": 2}},
           {"id": "R_2", "state": "COMMENTED", "submittedAt": "2026-11-01T09:30:00Z", "url": "https://github.com/acme/widgets/pull/42#pullrequestreview-2", "author": {"__typename": "Bot", "login": "copilot-pull-request-reviewer"}, "comments": {"totalCount": 3}},

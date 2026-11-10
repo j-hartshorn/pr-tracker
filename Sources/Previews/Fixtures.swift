@@ -9,15 +9,19 @@ enum Fixtures {
         viewer: "joe",
         authored: [
             pr(101, "Split the importer into stages", head: "importer-1", checks: .failing, hoursAgo: 2,
-               reviewers: ["alice"], reviews: [bot("b1", comments: 3)]),
-            pr(102, "Add a retry stage to the importer", base: "importer-1", head: "importer-2", hoursAgo: 3, reviewers: ["alice", "platform"]),
+               reviewers: ["alice"], waitingHours: 20, reviews: [bot("b1", comments: 3)]),
+            pr(102, "Add a retry stage to the importer", base: "importer-1", head: "importer-2", hoursAgo: 3, reviewers: ["alice", "platform"], waitingHours: 75),
             pr(103, "Report importer progress", base: "importer-2", head: "importer-3", isDraft: true, checks: .pending, hoursAgo: 3),
             pr(104, "Importer metrics", base: "importer-1", head: "importer-metrics", isDraft: true, mergeability: .conflicting, hoursAgo: 30),
-            pr(110, "Cache the dashboard query", repository: "acme/gadgets", decision: .approved, hoursAgo: 1,
+            pr(110, "Cache the dashboard query", repository: "acme/gadgets", head: "cache", decision: .approved, hoursAgo: 1,
                reviews: [review("r1", by: "bob", .approved), bot("b2", comments: 0)]),
+            pr(114, "Warm the dashboard cache on deploy", repository: "acme/gadgets", base: "cache", decision: .approved, hoursAgo: 1,
+               reviews: [review("r5", by: "bob", .approved)]),
             pr(111, "Rename the billing tables with a much longer title that will need to be cut off somewhere along the row", repository: "acme/gadgets",
                decision: .changesRequested, hoursAgo: 50, reviews: [review("r2", by: "carol", .changesRequested)]),
-            pr(112, "Remove the old feature flags", repository: "acme/gadgets", decision: .reviewRequired, hoursAgo: 0.4, reviewers: ["dave"]),
+            pr(115, "Paginate the audit log", repository: "acme/gadgets", hoursAgo: 4, reviews: [review("r6", by: "dave", .commented)], unanswered: 2),
+            pr(116, "Drop the legacy exporter", repository: "acme/gadgets", hoursAgo: 6),
+            pr(112, "Remove the old feature flags", repository: "acme/gadgets", decision: .reviewRequired, hoursAgo: 0.4, reviewers: ["dave"], waitingHours: 0.4),
             pr(113, "Try a new layout for settings", repository: "acme/gadgets", isDraft: true, checks: .none, hoursAgo: 200),
         ],
         reviewRequested: [
@@ -31,7 +35,7 @@ enum Fixtures {
         _ number: Int, _ title: String, repository: String = "acme/widgets", author: String = "joe",
         base: String = "main", head: String? = nil, isDraft: Bool = false,
         mergeability: Mergeability = .mergeable, checks: Checks = .passing, decision: ReviewDecision? = .reviewRequired,
-        hoursAgo: Double, reviewers: [String] = [], reviews: [Review] = []
+        hoursAgo: Double, reviewers: [String] = [], waitingHours: Double? = nil, reviews: [Review] = [], unanswered: Int = 0
     ) -> PullRequest {
         PullRequest(
             id: "PR_\(number)", number: number, title: title,
@@ -40,7 +44,8 @@ enum Fixtures {
             baseRef: base, headRef: head ?? "branch-\(number)", isFromFork: false,
             updatedAt: now.addingTimeInterval(-hoursAgo * 3600),
             mergeability: mergeability, checks: checks, reviewDecision: decision,
-            requestedReviewers: reviewers, reviews: reviews
+            requestedReviewers: reviewers, waitingSince: waitingHours.map { now.addingTimeInterval(-$0 * 3600) },
+            reviews: reviews, unansweredThreadCount: unanswered, lastCommitAt: now.addingTimeInterval(-hoursAgo * 3600 - 3600)
         )
     }
 

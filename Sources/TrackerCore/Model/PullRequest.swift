@@ -17,13 +17,19 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
     public var reviewDecision: ReviewDecision?
     /// User logins and team slugs.
     public var requestedReviewers: [String]
+    /// When the longest-waiting of the requested reviewers was asked.
+    public var waitingSince: Date?
     public var reviews: [Review]
+    /// Open review threads where a person other than the author spoke last.
+    public var unansweredThreadCount: Int
+    public var lastCommitAt: Date?
 
     public init(
         id: String, number: Int, title: String, url: URL, repository: String, author: String,
         isDraft: Bool, baseRef: String, headRef: String, isFromFork: Bool, updatedAt: Date,
         mergeability: Mergeability, checks: Checks, reviewDecision: ReviewDecision?,
-        requestedReviewers: [String], reviews: [Review]
+        requestedReviewers: [String], waitingSince: Date?, reviews: [Review],
+        unansweredThreadCount: Int, lastCommitAt: Date?
     ) {
         self.id = id
         self.number = number
@@ -40,7 +46,10 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
         self.checks = checks
         self.reviewDecision = reviewDecision
         self.requestedReviewers = requestedReviewers
+        self.waitingSince = waitingSince
         self.reviews = reviews
+        self.unansweredThreadCount = unansweredThreadCount
+        self.lastCommitAt = lastCommitAt
     }
 }
 
