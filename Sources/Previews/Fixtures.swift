@@ -17,6 +17,8 @@ enum Fixtures {
                reviews: [review("r1", by: "bob", .approved), bot("b2", comments: 0)]),
             pr(114, "Warm the dashboard cache on deploy", repository: "acme/gadgets", base: "cache", decision: .approved, hoursAgo: 1,
                reviews: [review("r5", by: "bob", .approved)]),
+            pr(117, "Batch the export jobs", repository: "acme/gadgets", checks: .pending, decision: .approved, hoursAgo: 0.2,
+               reviews: [review("r7", by: "bob", .approved)]),
             pr(111, "Rename the billing tables with a much longer title that will need to be cut off somewhere along the row", repository: "acme/gadgets",
                decision: .changesRequested, hoursAgo: 50, reviews: [review("r2", by: "carol", .changesRequested)]),
             pr(115, "Paginate the audit log", repository: "acme/gadgets", hoursAgo: 4, reviews: [review("r6", by: "dave", .commented)], unanswered: 2),

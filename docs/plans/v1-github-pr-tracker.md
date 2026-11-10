@@ -130,7 +130,7 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Me | `request a review` | Not a draft, not approved, nobody is asked, and no review is waiting on me. | Amber |
 | Me | `ready to merge` | Not a draft, approved, checks not failing or running, no conflicts, and nothing open beneath it in its stack. | Green |
 | Others | `waiting on bob for 3d` | Reviewers are asked. The time is since the longest-waiting one was asked. | None |
-| Others | `waiting on CI` | Approved, and checks are still running. | None |
+| Others | `waiting on CI` | Approved, and checks are still running. Not listed in Needs attention. | Amber, with the approved glyph |
 | Others | `waiting on #175` | Approved and green, but stacked on an open PR. | Green |
 | Others | `waiting on alice` | Someone else's PR that I took part in, with nothing for me to answer. Not listed anywhere. | None |
 | Nobody | `draft` | A draft with nothing broken and nothing to answer. | None |

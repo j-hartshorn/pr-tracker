@@ -46,7 +46,7 @@ There are three status colours. They are the only colours apart from the accent.
 Rules:
 
 - A status colour goes on a status glyph or a bar of the app icon, and nowhere else. Never on text, fills, borders or whole rows.
-- The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. It is never the only signal, because red and green are hard to tell apart for some people.
+- The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. One state mixes the two: something approved that cannot go ahead yet is the ready shape in `status-attention`. Colour is never the only signal, because red and green are hard to tell apart for some people.
 - The text next to the glyph still says what the state is.
 - Something with no status has no colour. Most of the screen stays grey.
 - A status colour is not the accent. The accent still marks the one suggested next action.
