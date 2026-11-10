@@ -6,6 +6,8 @@ Hairline is a minimal, monochrome design system for a personal project. It uses 
 
 This is version 2. It has tokens, four components (Button, Field, Alert, Toast) and these rules. The name is a working name.
 
+The SwiftUI version of the tokens and components is in `Sources/Hairline`.
+
 ## Principles
 
 1. **Remove before you add.** If an element does not help a person read or act, remove it.
@@ -31,9 +33,27 @@ Rules:
 - In an app, the accent goes on the action you want the person to take next. On a blog, that is the action at the end of a post (for example, Subscribe).
 - The accent is ultramarine (`#2b44c8`; `#8c9cff` on Dark). It was chosen over Prussian, ink, cobalt, steel and cerulean because it is the clearest signal against slate. Change the `accent` token to change it everywhere.
 
+## Status colours
+
+There are three status colours. They are the only colours apart from the accent, and they are for status glyphs only.
+
+| Token | Paper and Stark | Dark | Use |
+| --- | --- | --- | --- |
+| `status-failing` | `#a8261d` | `#f2877d` | Something is broken and needs fixing. |
+| `status-attention` | `#7d5600` | `#d9ac55` | Something waits on the person. |
+| `status-ready` | `#1f6a3c` | `#7ccf97` | Something is done and can go ahead. |
+
+Rules:
+
+- A status colour goes on a status glyph, and nowhere else. Never on text, fills, borders or whole rows.
+- The glyph keeps its shape (see "Alerts" below): solid for failing, half filled for attention, square in a square for ready, empty for no status. Colour repeats what the shape says. It is never the only signal, because red and green are hard to tell apart for some people.
+- The text next to the glyph still says what the state is.
+- Something with no status has no colour. Most of the screen stays grey.
+- A status colour is not the accent. The accent still marks the one suggested next action.
+
 ## Alerts: shape and contrast, not colour
 
-Alerts do not use colour. Urgency shows as **ink density**: the more of the glyph is filled, the more urgent the message.
+Alerts do not use colour. A status glyph in a list can (see "Status colours" above), but an alert box cannot. Urgency shows as **ink density**: the more of the glyph is filled, the more urgent the message.
 
 | Level | Glyph | Use |
 | --- | --- | --- |
