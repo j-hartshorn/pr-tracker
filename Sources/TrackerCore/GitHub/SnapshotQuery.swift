@@ -5,10 +5,10 @@ enum SnapshotQuery {
     static let text = """
     query {
       viewer { login }
-      authored: search(query: "is:pr is:open archived:false author:@me", type: ISSUE, first: 100) {
+      authored: search(query: "is:pr is:open archived:false author:@me sort:updated-desc", type: ISSUE, first: 100) {
         nodes { ...PullRequestFields }
       }
-      reviewRequested: search(query: "is:pr is:open archived:false user-review-requested:@me", type: ISSUE, first: 100) {
+      reviewRequested: search(query: "is:pr is:open archived:false user-review-requested:@me sort:updated-desc", type: ISSUE, first: 100) {
         nodes { ...PullRequestFields }
       }
     }
