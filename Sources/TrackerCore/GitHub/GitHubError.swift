@@ -5,6 +5,8 @@ public enum GitHubError: LocalizedError, Equatable {
     case ghFailed(String)
     case http(status: Int)
     case graphQL(String)
+    /// GitHub's rate limit was hit. Requests must stop until the given time.
+    case rateLimited(until: Date)
 
     public var errorDescription: String? {
         switch self {
@@ -18,6 +20,8 @@ public enum GitHubError: LocalizedError, Equatable {
             "GitHub returned HTTP \(status). The next refresh will try again."
         case .graphQL(let message):
             "GitHub could not answer the query: \(message)"
+        case .rateLimited(let until):
+            "GitHub's rate limit is used up. Refreshing starts again at \(until.formatted(date: .omitted, time: .shortened))."
         }
     }
 }

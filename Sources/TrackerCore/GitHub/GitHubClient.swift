@@ -11,21 +11,24 @@ public struct GitHubClient: Sendable {
         self.session = session
     }
 
-    public func fetchSnapshot() async throws -> Snapshot {
-        let data = try await send(query: SnapshotQuery.text, variables: [:])
-        return try SnapshotQuery.decode(data, fetchedAt: Date())
+    /// One cheap request for the overview, then a second only if a pull request of mine changed since `previous`. Pass nil to fetch everything again.
+    public func fetchSnapshot(reusing previous: Snapshot?) async throws -> Snapshot {
+        let overview = try OverviewQuery.decode(await send(query: OverviewQuery.text, variables: [String: String]()), fetchedAt: Date())
+        let ids = overview.idsNeedingDetails(since: previous)
+        let details = ids.isEmpty ? [:] : try DetailsQuery.decode(await send(query: DetailsQuery.text, variables: ["ids": ids]))
+        return overview.withDetails(details, reusing: previous)
     }
 
     public func setDraft(_ isDraft: Bool, pullRequestID: String) async throws {
         let mutation = isDraft ? "convertPullRequestToDraft" : "markPullRequestReadyForReview"
         let query = "mutation($id: ID!) { \(mutation)(input: {pullRequestId: $id}) { pullRequest { id } } }"
         let data = try await send(query: query, variables: ["id": pullRequestID])
-        if let message = try JSONDecoder().decode(GraphQLErrors.self, from: data).errors?.first?.message {
+        if let message = try JSONDecoder().decode(GraphQL.Response<EmptyPayload>.self, from: data).errors?.first?.message {
             throw GitHubError.graphQL(message)
         }
     }
 
-    private func send(query: String, variables: [String: String]) async throws -> Data {
+    private func send(query: String, variables: some Encodable) async throws -> Data {
         var request = URLRequest(url: Self.endpoint)
         request.httpMethod = "POST"
         request.timeoutInterval = 30
@@ -33,18 +36,19 @@ public struct GitHubClient: Sendable {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(GraphQLRequest(query: query, variables: variables))
         let (data, response) = try await session.data(for: request)
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        let http = response as? HTTPURLResponse
+        let status = http?.statusCode ?? 0
+        if let until = RateLimit.pausedUntil(status: status, header: { http?.value(forHTTPHeaderField: $0) }, body: data, now: Date()) {
+            throw GitHubError.rateLimited(until: until)
+        }
         guard status == 200 else { throw GitHubError.http(status: status) }
         return data
     }
 }
 
-private struct GraphQLRequest: Encodable {
+private struct GraphQLRequest<Variables: Encodable>: Encodable {
     var query: String
-    var variables: [String: String]
+    var variables: Variables
 }
 
-private struct GraphQLErrors: Decodable {
-    struct Message: Decodable { var message: String }
-    var errors: [Message]?
-}
+private struct EmptyPayload: Decodable {}

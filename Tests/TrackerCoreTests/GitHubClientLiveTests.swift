@@ -5,10 +5,19 @@ import Testing
 /// These talk to github.com with the gh token. They only read. Run them with GH_TRACKER_LIVE=1.
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["GH_TRACKER_LIVE"] != nil))
 struct GitHubClientLiveTests {
-    @Test func fetchesASnapshot() async throws {
-        let snapshot = try await GitHubClient().fetchSnapshot()
-        #expect(!snapshot.viewer.isEmpty)
-        #expect(snapshot.authored.allSatisfy { $0.author == snapshot.viewer })
+    @Test func fetchesASnapshotAndReusesItsDetails() async throws {
+        let client = GitHubClient()
+        let first = try await client.fetchSnapshot(reusing: nil)
+        #expect(!first.viewer.isEmpty)
+        #expect(first.authored.allSatisfy { $0.author == first.viewer })
+
+        let second = try await client.fetchSnapshot(reusing: first)
+        for pr in second.authored {
+            guard let before = first.authored.first(where: { $0.id == pr.id }), before.updatedAt == pr.updatedAt else { continue }
+            #expect(pr.reviews == before.reviews)
+            #expect(pr.unansweredThreadCount == before.unansweredThreadCount)
+            #expect(pr.waitingSince == before.waitingSince)
+        }
     }
 
     // A made-up id, so GitHub checks both mutations against its schema without changing anything.
