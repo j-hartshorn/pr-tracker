@@ -30,8 +30,11 @@ public struct GHTrackerApp: App {
                 .environment(copier)
                 .containerBackground(Palette.bg, for: .window)
                 .darkWhenSet()
+                .windowButtonsHidden()
                 .joinsDockWhileOpen(model)
         }
+        .windowStyle(.hiddenTitleBar)
+        .windowBackgroundDragBehavior(.enabled)
         .defaultSize(width: 860, height: 900)
         .commands {
             CommandGroup(before: .toolbar) {
