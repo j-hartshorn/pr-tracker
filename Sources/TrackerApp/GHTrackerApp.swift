@@ -1,13 +1,19 @@
+import Hairline
 import SwiftUI
 import TrackerCore
 
 public struct GHTrackerApp: App {
+    static let windowID = "main"
+
+    // Held with let and not @State, because @State needs a compiler plugin that ships only with Xcode.
     private let model: AppModel
 
     public init() {
+        if let resources = Bundle.main.resourceURL {
+            Fonts.register(in: resources.appending(path: "Fonts"))
+        }
         let notifier = Notifier()
-        let client = GitHubClient()
-        let model = AppModel(fetch: client.fetchSnapshot, file: .applicationSupport, notify: notifier.post)
+        let model = AppModel(client: GitHubClient(), file: .applicationSupport, notify: notifier.post)
         self.model = model
         Task {
             await notifier.requestAuthorization()
@@ -16,15 +22,19 @@ public struct GHTrackerApp: App {
     }
 
     public var body: some Scene {
-        MenuBarExtra("gh-tracker", systemImage: "square") {
-            if let snapshot = model.snapshot {
-                Text("\(snapshot.reviewRequested.count) to review, \(snapshot.authored.count) of mine")
-            }
-            if let error = model.lastError {
-                Text(error)
-            }
-            Button("Refresh") { Task { await model.refresh() } }
-            Button("Quit") { NSApplication.shared.terminate(nil) }
+        Window("gh-tracker", id: Self.windowID) {
+            MainWindow()
+                .environment(model)
+                .containerBackground(Palette.bg, for: .window)
         }
+        .defaultSize(width: 860, height: 900)
+
+        MenuBarExtra {
+            MenuPanel()
+                .environment(model)
+        } label: {
+            MenuBarIcon(status: model.snapshot?.mostUrgentStatus ?? .waiting)
+        }
+        .menuBarExtraStyle(.window)
     }
 }

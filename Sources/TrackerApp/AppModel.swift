@@ -13,21 +13,14 @@ public final class AppModel {
     public private(set) var lastError: String?
     public private(set) var isRefreshing = false
 
-    private let fetch: @Sendable () async throws -> Snapshot
+    private let client: GitHubClient
     private let file: SnapshotFile
     private let notify: @Sendable (Event) async -> Void
-    private let interval: Duration
 
-    public init(
-        fetch: @escaping @Sendable () async throws -> Snapshot,
-        file: SnapshotFile,
-        notify: @escaping @Sendable (Event) async -> Void,
-        interval: Duration = .seconds(60)
-    ) {
-        self.fetch = fetch
+    public init(client: GitHubClient, file: SnapshotFile, notify: @escaping @Sendable (Event) async -> Void) {
+        self.client = client
         self.file = file
         self.notify = notify
-        self.interval = interval
         self.snapshot = file.load()
     }
 
@@ -35,7 +28,7 @@ public final class AppModel {
         Task {
             while !Task.isCancelled {
                 await refresh()
-                try? await Task.sleep(for: interval)
+                try? await Task.sleep(for: .seconds(60))
             }
         }
     }
@@ -45,16 +38,29 @@ public final class AppModel {
         isRefreshing = true
         defer { isRefreshing = false }
         do {
-            let new = try await fetch().carryingMergeability(from: snapshot)
+            let new = try await client.fetchSnapshot().carryingMergeability(from: snapshot)
             let events = new.events(since: snapshot)
             snapshot = new
             lastError = nil
-            try file.save(new)
             log.info("refreshed: \(new.authored.count) authored, \(new.reviewRequested.count) to review, \(events.count) events")
             for event in events { await notify(event) }
+            try file.save(new)
         } catch {
             lastError = error.localizedDescription
             log.error("refresh failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    public func setDraft(_ isDraft: Bool, for pullRequest: PullRequest) async {
+        do {
+            try await client.setDraft(isDraft, pullRequestID: pullRequest.id)
+            // Shown at once. The next poll brings the reviewers and checks that follow from the change.
+            if let index = snapshot?.authored.firstIndex(where: { $0.id == pullRequest.id }) {
+                snapshot?.authored[index].isDraft = isDraft
+            }
+        } catch {
+            lastError = error.localizedDescription
+            log.error("setting draft failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

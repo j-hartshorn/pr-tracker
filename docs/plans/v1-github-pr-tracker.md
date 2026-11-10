@@ -6,7 +6,7 @@ A local macOS app in Swift that tracks the GitHub PRs I'm involved with and noti
 
 | Topic | Decision |
 | --- | --- |
-| App shape | Menu bar item plus a full window. |
+| App shape | Menu bar item plus a full window. The window is one page of sections from top to bottom, not tabs. |
 | Stacks | Inferred from base-branch chains. A PR whose base branch is another open PR's head branch is stacked on it. |
 | Drafts | List them, with "Mark ready" and "Convert to draft" actions. |
 | Review requests | A PR is mine only if I'm requested by name (`user-review-requested:@me`). Team requests, with or without another person named, are ignored in v1. |
@@ -43,10 +43,19 @@ These are my defaults. Change any of them before I start.
 - Live data: Copilot posted 14 reviews on my last 40 PRs, and 9 of them had no comments.
 - The six status colour values below, for contrast against `bg`.
 
+## Found while building
+
+- **Notifications work from an ad-hoc signed app.** Permission is tied to the bundle identifier, so it survives rebuilds.
+- **`@State` needs Xcode.** On this SDK it is a macro whose compiler plugin does not ship with the Command Line Tools. The app keeps state in `@Observable` classes held with `let`.
+- **Test builds are flaky without Xcode.** Some builds cannot find the Testing macro plugin. `scripts/check.sh` builds again when that happens.
+- **The window does not open at launch**, because the app has no Dock icon. It opens from the menu bar item.
+- **The draft actions ask first.** Marking ready notifies reviewers, so a stray click should not do it.
+- **Minimum macOS is 26**, for exact line heights in SwiftUI.
+
 ## Not yet verified
 
-- **Notifications from an ad-hoc signed app.** `UNUserNotificationCenter` needs a real bundle with a bundle identifier. I think ad-hoc signing is enough, but I haven't tried it. Slice 1 exists to settle this first.
-- **The exact GraphQL query.** The fields below exist as far as I know, but the full query has only been run in part.
+- **Clicking a notification opens the link.** The code is in place, but only a person can click one.
+- **The draft actions against a real pull request.** GitHub accepts both mutations for a made-up id, so their shape is right. Running them for real would notify colleagues, so that is left to me.
 
 ## Architecture
 
@@ -131,12 +140,12 @@ Each slice leaves a working app.
    Verify: decoding tests against a recorded response, and the menu shows live PR counts.
 3. **Events and notifications.** `diff`, snapshot persistence, the poll loop, the four notifications.
    Verify: tests for every row of the event table, the `UNKNOWN` rule and the first-run baseline.
-4. **Window and Hairline.** Tokens, fonts, light and dark themes, `status(of:)`, and two lists: reviews requested of me, and my PRs waiting on reviewers. Add the status tokens and their rules to `docs/design-system` (`tokens.json`, `tokens.css` and `README.md`, edited by hand as there is no generator in the repo).
-   Verify: tests for each status row and its precedence, and by eye in both appearances against `docs/design-system/index.html`.
+4. **Window and Hairline.** Tokens, fonts, light and dark themes, `status(of:)`, and two sections: reviews requested of me, and my PRs waiting on reviewers. Add the status tokens and their rules to `docs/design-system` (`tokens.json`, `tokens.css` and `README.md`, edited by hand as there is no generator in the repo).
+   Verify: tests for each status row and its precedence, and by eye in both appearances against `docs/design-system/index.html`, using `swift run Previews`.
 5. **Stacks.** `stacks(from:)` and the stack view, with review, conflict and CI state per PR.
    Verify: tests for a chain, a branching stack, a single PR and a fork.
-6. **Drafts.** Drafts list with the two actions.
-   Verify: toggle a real draft PR both ways.
+6. **Drafts.** Drafts section with the two actions.
+   Verify: GitHub accepts both mutations for a made-up id. Toggling a real draft PR is left to me.
 7. **Menu bar status.** The icon shows the most urgent status, and the dropdown shows the short list.
 
 ## Out of scope for v1

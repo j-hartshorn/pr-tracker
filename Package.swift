@@ -1,12 +1,14 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
     name: "gh-tracker",
-    platforms: [.macOS(.v15)],
+    platforms: [.macOS(.v26)],
     targets: [
         .executableTarget(name: "GHTracker", dependencies: ["TrackerApp"]),
-        .target(name: "TrackerApp", dependencies: ["TrackerCore"]),
+        .executableTarget(name: "Previews", dependencies: ["TrackerApp", "TrackerCore", "Hairline"]),
+        .target(name: "TrackerApp", dependencies: ["TrackerCore", "Hairline"]),
+        .target(name: "Hairline"),
         .target(name: "TrackerCore"),
         .testTarget(name: "TrackerCoreTests", dependencies: ["TrackerCore"]),
     ]
