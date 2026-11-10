@@ -64,6 +64,17 @@ extension Snapshot {
             }
     }
 
+    /// Minutes ago within the hour, then the time of day.
+    func updatedText(now: Date) -> String {
+        let minutes = Int(max(0, now.timeIntervalSince(fetchedAt)) / 60)
+        return switch minutes {
+        case 0: "Updated just now"
+        case 1: "Updated 1 minute ago"
+        case ..<60: "Updated \(minutes) minutes ago"
+        default: "Updated \(fetchedAt.formatted(date: .omitted, time: .shortened))"
+        }
+    }
+
     /// How long before this snapshot the pull request last changed.
     func age(of pr: PullRequest) -> String {
         duration(since: pr.updatedAt)

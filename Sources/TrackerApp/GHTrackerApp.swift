@@ -22,7 +22,7 @@ public struct GHTrackerApp: App {
     }
 
     public var body: some Scene {
-        Window("gh-tracker", id: Self.windowID) {
+        Window("PR Tracker", id: Self.windowID) {
             MainWindow()
                 .environment(model)
                 .containerBackground(Palette.bg, for: .window)

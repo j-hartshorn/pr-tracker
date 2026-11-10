@@ -38,16 +38,19 @@ public struct MainWindow: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: Space.s3) {
+            Text("PR Tracker").textStyle(.subheading).foregroundStyle(Palette.ink)
             Spacer()
-            if let fetchedAt = model.snapshot?.fetchedAt {
-                Text("Updated \(fetchedAt.formatted(date: .omitted, time: .shortened))")
-                    .textStyle(.label)
-                    .foregroundStyle(Palette.inkMuted)
+            if let snapshot = model.snapshot {
+                TimelineView(.periodic(from: .now, by: 30)) { context in
+                    Text(snapshot.updatedText(now: context.date))
+                        .textStyle(.label)
+                        .foregroundStyle(Palette.inkMuted)
+                }
             }
             Button(model.isRefreshing ? "Refreshing" : "Refresh") {
                 Task { await model.refresh(everything: true) }
             }
-            .buttonStyle(.hairline(.quiet, size: .small))
+            .buttonStyle(.hairline(size: .small))
             .disabled(model.isRefreshing)
         }
     }
