@@ -6,6 +6,8 @@ public enum NextStep: Equatable, Sendable {
     case review
     /// Open review threads where another person spoke last.
     case answerComments(Int)
+    /// Someone else's pull request, where I was mentioned and have not commented or reviewed since.
+    case answerMention
     /// Reviewers who commented or requested changes, and nothing has gone back to them since.
     case respond(to: [String])
     case fixChecks
@@ -18,12 +20,14 @@ public enum NextStep: Equatable, Sendable {
     case waitingOnChecks
     /// Approved, but stacked on an open pull request with this number.
     case waitingOnStack(below: Int)
+    /// Someone else's pull request that I took part in, with nothing of theirs for me to answer.
+    case waitingOnAuthor
     case draft
 
     public var isMine: Bool {
         switch self {
-        case .review, .answerComments, .respond, .fixChecks, .resolveConflicts, .requestReview, .merge: true
-        case .waitingOnReviewers, .waitingOnChecks, .waitingOnStack, .draft: false
+        case .review, .answerComments, .answerMention, .respond, .fixChecks, .resolveConflicts, .requestReview, .merge: true
+        case .waitingOnReviewers, .waitingOnChecks, .waitingOnStack, .waitingOnAuthor, .draft: false
         }
     }
 
@@ -31,11 +35,11 @@ public enum NextStep: Equatable, Sendable {
     fileprivate var rank: Int {
         switch self {
         case .review: 0
-        case .answerComments, .respond: 1
+        case .answerComments, .answerMention, .respond: 1
         case .fixChecks, .resolveConflicts: 2
         case .requestReview: 3
         case .merge: 4
-        case .waitingOnReviewers, .waitingOnChecks, .waitingOnStack, .draft: 5
+        case .waitingOnReviewers, .waitingOnChecks, .waitingOnStack, .waitingOnAuthor, .draft: 5
         }
     }
 }
@@ -43,7 +47,7 @@ public enum NextStep: Equatable, Sendable {
 extension Snapshot {
     /// Every step that is mine to take, or else the one thing the pull request waits on. Never empty.
     public func nextSteps(for pr: PullRequest) -> [NextStep] {
-        guard pr.author == viewer else { return [.review] }
+        guard pr.author == viewer else { return [stepOnTheirs(pr)] }
 
         let reviewers = pr.reviewersAwaitingResponse
         let approved = pr.approval == .approved
@@ -72,9 +76,15 @@ extension Snapshot {
         return [.waitingOnChecks]
     }
 
+    private func stepOnTheirs(_ pr: PullRequest) -> NextStep {
+        if reviewRequested.contains(where: { $0.id == pr.id }) { return .review }
+        if pr.unansweredThreadCount > 0 { return .answerComments(pr.unansweredThreadCount) }
+        return pr.mentionedAt == nil ? .waitingOnAuthor : .answerMention
+    }
+
     /// The pull requests where the ball is with me, in the order to look at them.
     public var needingAttention: [PullRequest] {
-        (reviewRequested + authored)
+        (reviewRequested + involved + authored)
             .map { (pullRequest: $0, rank: nextSteps(for: $0)[0].rank) }
             .filter { $0.rank < NextStep.draft.rank }
             .enumerated()

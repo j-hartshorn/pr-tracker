@@ -28,6 +28,11 @@ enum Fixtures {
             pr(201, "Make the scheduler idempotent", author: "alice", checks: .passing, hoursAgo: 5),
             pr(202, "Bump the Go toolchain", repository: "acme/gadgets", author: "bob", checks: .failing, hoursAgo: 26),
         ],
+        involved: [
+            pr(301, "Move the queue to Postgres", author: "carol", hoursAgo: 7, unanswered: 2),
+            pr(302, "Document the release steps", repository: "acme/gadgets", author: "dave", hoursAgo: 40, mentioned: true),
+            pr(303, "Tidy the build scripts", author: "alice", hoursAgo: 90),
+        ],
         fetchedAt: now
     )
 
@@ -35,7 +40,8 @@ enum Fixtures {
         _ number: Int, _ title: String, repository: String = "acme/widgets", author: String = "joe",
         base: String = "main", head: String? = nil, isDraft: Bool = false,
         mergeability: Mergeability = .mergeable, checks: Checks = .passing, decision: ReviewDecision? = .reviewRequired,
-        hoursAgo: Double, reviewers: [String] = [], waitingHours: Double? = nil, reviews: [Review] = [], unanswered: Int = 0
+        hoursAgo: Double, reviewers: [String] = [], waitingHours: Double? = nil, reviews: [Review] = [], unanswered: Int = 0,
+        mentioned: Bool = false
     ) -> PullRequest {
         PullRequest(
             id: "PR_\(number)", number: number, title: title,
@@ -45,7 +51,8 @@ enum Fixtures {
             updatedAt: now.addingTimeInterval(-hoursAgo * 3600),
             mergeability: mergeability, checks: checks, reviewDecision: decision,
             requestedReviewers: reviewers, waitingSince: waitingHours.map { now.addingTimeInterval(-$0 * 3600) },
-            reviews: reviews, unansweredThreadCount: unanswered, lastCommitAt: now.addingTimeInterval(-hoursAgo * 3600 - 3600)
+            reviews: reviews, unansweredThreadCount: unanswered, lastCommitAt: now.addingTimeInterval(-hoursAgo * 3600 - 3600),
+            mentionedAt: mentioned ? now : nil
         )
     }
 

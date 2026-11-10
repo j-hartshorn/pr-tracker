@@ -22,7 +22,19 @@ extension Snapshot {
             }
             return events
         }
-        return requested + authoredEvents
+        let oldInvolved = Dictionary(old.involved.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let involvedEvents = involved.flatMap { pr -> [Event] in
+            let before = oldInvolved[pr.id]
+            var events: [Event] = []
+            if let mentionedAt = pr.mentionedAt, mentionedAt != before?.mentionedAt {
+                events.append(Event(kind: .mentioned, pullRequest: pr, url: pr.url))
+            }
+            if pr.unansweredThreadCount > before?.unansweredThreadCount ?? 0 {
+                events.append(Event(kind: .replied, pullRequest: pr, url: pr.url))
+            }
+            return events
+        }
+        return requested + involvedEvents + authoredEvents
     }
 
     /// GitHub computes mergeability lazily and often answers "unknown". Keeping the last known answer stops that from hiding or repeating a conflict.

@@ -2,14 +2,14 @@
 
 A macOS menu bar app that tracks the GitHub pull requests I'm involved with and notifies me when one needs me.
 
-- **Notifies** when my review is requested by name, when someone reviews one of my pull requests, and when one of mine fails CI or gets a merge conflict.
+- **Notifies** when my review is requested by name, when someone reviews one of my pull requests, when one of mine fails CI or gets a merge conflict, and when someone mentions me or replies to my review comments on their pull request.
 - **Menu bar**: a square glyph showing the most urgent status, with a dropdown of the pull requests that need something, one line each.
 - **Dock**: while the window is open, the three bars of the icon take the colours of the three most urgent pull requests that need me.
 - **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link, with a brief "Copied" toast.
 
 It polls GitHub every minute, or as often as Settings says, with the token from the `gh` CLI. It stores no credentials.
 
-A poll costs 2 of GitHub's 5,000 GraphQL points an hour, plus about 1 for each pull request that changed. If GitHub says the limit was hit, the app stops until the reset time.
+A poll costs 3 of GitHub's 5,000 GraphQL points an hour, plus about 1 for each pull request of mine that changed and 2 for each of someone else's. If GitHub says the limit was hit, the app stops until the reset time.
 
 ## Run
 
@@ -58,7 +58,7 @@ Each layer only knows about the ones below it.
 - **Who has the ball, and what needs attention**: `Rules/NextStep.swift`, with `NextStepTests`.
 - **What red, amber and green mean**: `Rules/Status.swift`.
 - **The words for a next step**: `TrackerApp/Presentation/Snapshot+Facts.swift`.
-- **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift`. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
+- **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift` for my pull requests, or `GitHub/InvolvedQuery.swift` for other people's. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
 - **The sections of the window**: `TrackerApp/Views/MainWindow.swift`.
 - **A row**: `Views/PullRequestRow.swift` in the window, `Views/CompactPullRequestRow.swift` in the menu panel. Both use `Views/PullRequestLink.swift` for click and right-click.
 - **The app icon**: `Support/AppIcon.svg` for the bundle, and `scripts/bundle.sh` makes the `.icns` from it. `Hairline/AppIcon.swift` draws the same mark for the Dock, and `TrackerApp/DockPresence.swift` colours it. Change both drawings together.

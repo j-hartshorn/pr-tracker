@@ -12,6 +12,9 @@ enum OverviewQuery {
       reviewRequested: search(query: "is:pr is:open archived:false user-review-requested:@me sort:updated-desc", type: ISSUE, first: 50) {
         nodes { ...Overview }
       }
+      involved: search(query: "is:pr is:open archived:false involves:@me -author:@me -user-review-requested:@me sort:updated-desc", type: ISSUE, first: 30) {
+        nodes { ...Overview }
+      }
     }
 
     fragment Overview on PullRequest {
@@ -35,6 +38,7 @@ enum OverviewQuery {
             viewer: payload.viewer.login,
             authored: payload.authored.elements.map(\.pullRequest),
             reviewRequested: payload.reviewRequested.elements.map(\.pullRequest),
+            involved: payload.involved?.elements.map(\.pullRequest) ?? [],
             fetchedAt: fetchedAt
         )
     }
@@ -43,6 +47,7 @@ enum OverviewQuery {
         var viewer: GraphQL.Actor
         var authored: GraphQL.Connection<Node>
         var reviewRequested: GraphQL.Connection<Node>
+        var involved: GraphQL.Connection<Node>?
     }
 
     private struct Repository: Decodable {

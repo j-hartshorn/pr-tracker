@@ -123,6 +123,8 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Me | `review for alice` | Someone else's PR requests my review by name. | Amber |
 | Me | `answer 2 comments` | Open review threads where another person spoke last. | Amber |
 | Me | `respond to carol` | Carol commented or requested changes, is not asked again, and has seen no commit or reply from me since. Shown only when no thread is unanswered. | Amber |
+| Me | `answer 2 comments` | On someone else's PR: open threads I began where another person spoke last. | Amber |
+| Me | `answer a mention` | On someone else's PR: I was mentioned and have not commented or reviewed since. Shown only when no thread waits on me. | Amber |
 | Me | `fix CI` | Checks failed or errored. Applies to drafts too. | Red |
 | Me | `resolve conflicts` | There is a merge conflict. Applies to drafts too. | Red |
 | Me | `request a review` | Not a draft, not approved, nobody is asked, and no review is waiting on me. | Amber |
@@ -130,6 +132,7 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Others | `waiting on bob for 3d` | Reviewers are asked. The time is since the longest-waiting one was asked. | None |
 | Others | `waiting on CI` | Approved, and checks are still running. | None |
 | Others | `waiting on #175` | Approved and green, but stacked on an open PR. | Green |
+| Others | `waiting on alice` | Someone else's PR that I took part in, with nothing for me to answer. Not listed anywhere. | None |
 | Nobody | `draft` | A draft with nothing broken and nothing to answer. | None |
 
 The Needs attention section lists the PRs whose first step is mine, in the order of the table. A PR's colour is that of its most urgent step: red, then amber, then green. The menu bar icon shows the most urgent colour among the PRs that need me, so a green PR that waits on its stack leaves it quiet.

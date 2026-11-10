@@ -17,7 +17,8 @@ extension PullRequest {
         waitingSince: Date? = nil,
         reviews: [Review] = [],
         unansweredThreads: Int = 0,
-        lastCommitAt: Date? = nil
+        lastCommitAt: Date? = nil,
+        mentionedAt: Date? = nil
     ) -> PullRequest {
         PullRequest(
             id: "\(repository)#\(number)",
@@ -38,7 +39,8 @@ extension PullRequest {
             waitingSince: waitingSince,
             reviews: reviews,
             unansweredThreadCount: unansweredThreads,
-            lastCommitAt: lastCommitAt
+            lastCommitAt: lastCommitAt,
+            mentionedAt: mentionedAt
         )
     }
 }
@@ -65,7 +67,7 @@ extension Review {
 }
 
 extension Snapshot {
-    static func fixture(authored: [PullRequest] = [], reviewRequested: [PullRequest] = []) -> Snapshot {
-        Snapshot(viewer: "joe", authored: authored, reviewRequested: reviewRequested, fetchedAt: Date(timeIntervalSince1970: 1_700_000_000))
+    static func fixture(authored: [PullRequest] = [], reviewRequested: [PullRequest] = [], involved: [PullRequest] = []) -> Snapshot {
+        Snapshot(viewer: "joe", authored: authored, reviewRequested: reviewRequested, involved: involved, fetchedAt: Date(timeIntervalSince1970: 1_700_000_000))
     }
 }

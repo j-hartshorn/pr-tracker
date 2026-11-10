@@ -27,6 +27,29 @@ import Testing
         #expect(events[0].body == "acme/widgets #2: Change 2")
     }
 
+    @Test func mentionedWhenIAmNewlyTagged() {
+        let t0 = Date(timeIntervalSince1970: 1_700_000_000)
+        let quiet = PullRequest.fixture(2, author: "alice")
+        let tagged = PullRequest.fixture(2, author: "alice", mentionedAt: t0)
+        let taggedAgain = PullRequest.fixture(2, author: "alice", mentionedAt: t0.addingTimeInterval(60))
+        let events = Snapshot.fixture(involved: [tagged]).events(since: .fixture(involved: [quiet]))
+        #expect(events == [Event(kind: .mentioned, pullRequest: tagged, url: tagged.url)])
+        #expect(events[0].title == "You were mentioned")
+        #expect(Snapshot.fixture(involved: [tagged]).events(since: .fixture()).map(\.kind) == [.mentioned])
+        #expect(Snapshot.fixture(involved: [taggedAgain]).events(since: .fixture(involved: [tagged])).map(\.kind) == [.mentioned])
+        #expect(Snapshot.fixture(involved: [tagged]).events(since: .fixture(involved: [tagged])).isEmpty)
+        #expect(Snapshot.fixture(involved: [quiet]).events(since: .fixture(involved: [tagged])).isEmpty)
+    }
+
+    @Test func repliedWhenMoreOfMyThreadsWaitOnMe() {
+        let one = PullRequest.fixture(2, author: "alice", unansweredThreads: 1)
+        let two = PullRequest.fixture(2, author: "alice", unansweredThreads: 2)
+        let events = Snapshot.fixture(involved: [two]).events(since: .fixture(involved: [one]))
+        #expect(events == [Event(kind: .replied, pullRequest: two, url: two.url)])
+        #expect(events[0].title == "alice replied to your review")
+        #expect(Snapshot.fixture(involved: [one]).events(since: .fixture(involved: [two])).isEmpty)
+    }
+
     @Test func reviewPostedLinksToTheReview() {
         let review = Review.fixture("r1", by: "alice", .approved)
         let pr = PullRequest.fixture(1, reviews: [review])

@@ -167,6 +167,35 @@ import Testing
         #expect(pr.approval == .reviewRequired)
     }
 
+    // MARK: Other people's pull requests that I took part in
+
+    @Test func answerCommentsWhenSomeoneRepliedToMyReview() {
+        let theirs = PullRequest.fixture(2, author: "alice", unansweredThreads: 2, mentionedAt: Self.t1)
+        #expect(steps(theirs, in: .fixture(involved: [theirs])) == [.answerComments(2)])
+    }
+
+    @Test func answerMentionWhenIWasTaggedAndHaveNotSpokenSince() {
+        let theirs = PullRequest.fixture(2, author: "alice", mentionedAt: Self.t1)
+        #expect(steps(theirs, in: .fixture(involved: [theirs])) == [.answerMention])
+    }
+
+    @Test func waitingOnAuthorWhenNothingIsOwedToAnyone() {
+        let theirs = PullRequest.fixture(2, author: "alice")
+        let snapshot = Snapshot.fixture(involved: [theirs])
+        #expect(steps(theirs, in: snapshot) == [.waitingOnAuthor])
+        #expect(snapshot.needingAttention.isEmpty)
+        #expect(snapshot.status(of: theirs) == .waiting)
+    }
+
+    @Test func aMentionNeedsAttentionAfterReviewsAndWithAnswers() {
+        let toReview = PullRequest.fixture(7, author: "alice")
+        let mentioned = PullRequest.fixture(8, author: "bob", mentionedAt: Self.t1)
+        let toMerge = PullRequest.fixture(1, reviewDecision: .approved)
+        let snapshot = Snapshot.fixture(authored: [toMerge], reviewRequested: [toReview], involved: [mentioned])
+        #expect(snapshot.needingAttention.map(\.number) == [7, 8, 1])
+        #expect(snapshot.status(of: mentioned) == .attention)
+    }
+
     // MARK: Needing attention and status
 
     @Test func needingAttentionIsOrderedByWhatToLookAtFirst() {

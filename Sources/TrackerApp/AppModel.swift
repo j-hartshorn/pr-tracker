@@ -59,7 +59,7 @@ public final class AppModel {
             let events = new.events(since: snapshot)
             snapshot = new
             lastError = nil
-            log.info("refreshed: \(new.authored.count) authored, \(new.reviewRequested.count) to review, \(events.count) events")
+            log.info("refreshed: \(new.authored.count) authored, \(new.reviewRequested.count) to review, \(new.involved.count) involved, \(events.count) events")
             for event in events { await notify(event) }
             try file.save(new)
         } catch {

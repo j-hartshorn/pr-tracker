@@ -12,6 +12,7 @@ extension Snapshot {
         case .review: "review for \(pr.author)"
         case .answerComments(1): "answer 1 comment"
         case .answerComments(let count): "answer \(count) comments"
+        case .answerMention: "answer a mention"
         case .respond(let reviewers): "respond to \(reviewers.joined(separator: ", "))"
         case .fixChecks: "fix CI"
         case .resolveConflicts: "resolve conflicts"
@@ -21,6 +22,7 @@ extension Snapshot {
             "waiting on \(reviewers.joined(separator: ", "))" + (since.map { " for \(duration(since: $0))" } ?? "")
         case .waitingOnChecks: "waiting on CI"
         case .waitingOnStack(let number): "waiting on #\(number)"
+        case .waitingOnAuthor: "waiting on \(pr.author)"
         case .draft: "draft"
         }
     }
@@ -34,6 +36,8 @@ extension Snapshot {
         if isMine, steps[0].isMine, !pr.requestedReviewers.isEmpty {
             facts.append("waiting on \(pr.requestedReviewers.joined(separator: ", "))")
         }
+        // "review for alice" names the author already. The other steps on someone else's pull request do not.
+        if !isMine, steps != [.review] { facts.append("by \(pr.author)") }
         // Only failing CI is news. On my own pull requests it is already the step "fix CI".
         guard isMine else { return pr.checks == .failing ? facts + ["CI failing"] : facts }
         switch pr.approval {

@@ -11,12 +11,14 @@ public struct GitHubClient: Sendable {
         self.session = session
     }
 
-    /// One cheap request for the overview, then a second only if a pull request of mine changed since `previous`. Pass nil to fetch everything again.
+    /// One cheap request for the overview, then one for my pull requests and one for other people's, each only if one of them changed since `previous`. Pass nil to fetch everything again.
     public func fetchSnapshot(reusing previous: Snapshot?) async throws -> Snapshot {
         let overview = try OverviewQuery.decode(await send(query: OverviewQuery.text, variables: [String: String]()), fetchedAt: Date())
         let ids = overview.idsNeedingDetails(since: previous)
         let details = ids.isEmpty ? [:] : try DetailsQuery.decode(await send(query: DetailsQuery.text, variables: ["ids": ids]))
-        return overview.withDetails(details, reusing: previous)
+        let involvedIDs = overview.involvedIDsNeedingDetails(since: previous)
+        let involved = involvedIDs.isEmpty ? [:] : try InvolvedQuery.decode(await send(query: InvolvedQuery.text, variables: ["ids": involvedIDs]), viewer: overview.viewer)
+        return overview.withDetails(details, reusing: previous).withInvolvedDetails(involved, reusing: previous)
     }
 
     private func send(query: String, variables: some Encodable) async throws -> Data {

@@ -4,6 +4,10 @@ import Foundation
 public struct Event: Equatable, Sendable {
     public enum Kind: Equatable, Sendable {
         case reviewRequested
+        /// On someone else's pull request.
+        case mentioned
+        /// On someone else's pull request, in a thread I began.
+        case replied
         case reviewPosted(by: String, state: Review.State)
         case botReviewPosted(by: String, commentCount: Int)
         case checksFailed
@@ -18,6 +22,8 @@ public struct Event: Equatable, Sendable {
     public var id: String {
         let suffix = switch kind {
         case .reviewRequested: "review-requested"
+        case .mentioned: "mention"
+        case .replied: "replies"
         case .reviewPosted(let reviewer, _), .botReviewPosted(let reviewer, _): "review/\(reviewer)"
         case .checksFailed: "checks"
         case .conflicted: "conflict"
@@ -29,6 +35,10 @@ public struct Event: Equatable, Sendable {
         switch kind {
         case .reviewRequested:
             "\(pullRequest.author) requested your review"
+        case .mentioned:
+            "You were mentioned"
+        case .replied:
+            "\(pullRequest.author) replied to your review"
         case .reviewPosted(let reviewer, .approved):
             "\(reviewer) approved"
         case .reviewPosted(let reviewer, .changesRequested):

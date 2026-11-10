@@ -18,9 +18,9 @@ extension NextStep {
     public var status: Status {
         switch self {
         case .fixChecks, .resolveConflicts: .failing
-        case .review, .answerComments, .respond, .requestReview: .attention
+        case .review, .answerComments, .answerMention, .respond, .requestReview: .attention
         case .merge, .waitingOnStack: .ready
-        case .waitingOnReviewers, .waitingOnChecks, .draft: .waiting
+        case .waitingOnReviewers, .waitingOnChecks, .waitingOnAuthor, .draft: .waiting
         }
     }
 }
