@@ -20,7 +20,7 @@ extension Snapshot {
         case .waitingOnReviewers(let reviewers, let since):
             "waiting on \(reviewers.joined(separator: ", "))" + (since.map { " for \(duration(since: $0))" } ?? "")
         case .waitingOnChecks: "waiting on CI"
-        case .waitingOnStack(let number): "waiting on #\(number) below"
+        case .waitingOnStack(let number): "waiting on #\(number)"
         case .draft: "draft"
         }
     }

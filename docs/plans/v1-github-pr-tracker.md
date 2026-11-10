@@ -129,7 +129,7 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Me | `ready to merge` | Not a draft, approved, checks not failing or running, no conflicts, and nothing open beneath it in its stack. | Green |
 | Others | `waiting on bob for 3d` | Reviewers are asked. The time is since the longest-waiting one was asked. | None |
 | Others | `waiting on CI` | Approved, and checks are still running. | None |
-| Others | `waiting on #175 below` | Approved and green, but stacked on an open PR. | None |
+| Others | `waiting on #175` | Approved and green, but stacked on an open PR. | None |
 | Nobody | `draft` | A draft with nothing broken and nothing to answer. | None |
 
 The Needs attention section lists the PRs whose first step is mine, in the order of the table. A PR's colour is that of its most urgent step: red, then amber, then green.
