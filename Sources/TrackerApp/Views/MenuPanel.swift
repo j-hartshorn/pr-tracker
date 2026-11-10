@@ -2,7 +2,7 @@ import Hairline
 import SwiftUI
 import TrackerCore
 
-/// The menu bar dropdown: only the pull requests that are failing, need me, or are ready.
+/// The menu bar dropdown: only the pull requests that need me.
 public struct MenuPanel: View {
     private static let rowLimit = 8
 
@@ -18,11 +18,11 @@ public struct MenuPanel: View {
                     .padding(.bottom, Space.s3)
             }
             if let snapshot = model.snapshot {
-                let pullRequests = notable(in: snapshot)
+                let pullRequests = snapshot.needingAttention
                 PullRequestList(
                     rows: pullRequests.prefix(Self.rowLimit).map { PullRequestListRow(pullRequest: $0) },
                     snapshot: snapshot, emptyText: "Nothing needs you right now."
-                ) { _ in }
+                )
                 if pullRequests.count > Self.rowLimit {
                     Text("And \(pullRequests.count - Self.rowLimit) more in the window.")
                         .textStyle(.small)
@@ -48,13 +48,5 @@ public struct MenuPanel: View {
         .padding(Space.s3)
         .frame(width: 420, alignment: .leading)
         .background(Palette.bg)
-    }
-
-    private func notable(in snapshot: Snapshot) -> [PullRequest] {
-        (snapshot.reviewRequested + snapshot.authored)
-            .map { (pullRequest: $0, status: snapshot.status(of: $0)) }
-            .filter { $0.status != .waiting }
-            .sorted { $0.status < $1.status }
-            .map(\.pullRequest)
     }
 }

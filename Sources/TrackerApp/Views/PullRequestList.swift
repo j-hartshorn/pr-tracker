@@ -15,11 +15,11 @@ struct PullRequestListRow: Identifiable {
 }
 
 /// Rows divided by hairlines, or a line of text when there is nothing to show.
-struct PullRequestList<Trailing: View>: View {
+struct PullRequestList: View {
     let rows: [PullRequestListRow]
     let snapshot: Snapshot
     let emptyText: String
-    @ViewBuilder var trailing: (PullRequest) -> Trailing
+    var setDraft: ((Bool, PullRequest) -> Void)?
 
     var body: some View {
         if rows.isEmpty {
@@ -30,7 +30,10 @@ struct PullRequestList<Trailing: View>: View {
         } else {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(rows) { row in
-                    PullRequestRow(pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth) { trailing(row.pullRequest) }
+                    PullRequestRow(
+                        pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth,
+                        setDraft: setDraft.map { setDraft in { setDraft($0, row.pullRequest) } }
+                    )
                     Rule()
                 }
             }

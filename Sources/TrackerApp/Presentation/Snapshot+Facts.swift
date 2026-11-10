@@ -2,37 +2,54 @@ import Foundation
 import TrackerCore
 
 extension Snapshot {
-    /// The short facts shown under a pull request's title. They say in words what the glyph shows.
+    /// What the pull request waits on, in words. This is the line that says who has the ball.
+    func nextStepsText(for pr: PullRequest) -> String {
+        nextSteps(for: pr).map { text(for: $0, of: pr) }.joined(separator: " · ")
+    }
+
+    private func text(for step: NextStep, of pr: PullRequest) -> String {
+        switch step {
+        case .review: "review for \(pr.author)"
+        case .answerComments(1): "answer 1 comment"
+        case .answerComments(let count): "answer \(count) comments"
+        case .respond(let reviewers): "respond to \(reviewers.joined(separator: ", "))"
+        case .fixChecks: "fix CI"
+        case .resolveConflicts: "resolve conflicts"
+        case .requestReview: "request a review"
+        case .merge: "ready to merge"
+        case .waitingOnReviewers(let reviewers, let since):
+            "waiting on \(reviewers.joined(separator: ", "))" + (since.map { " for \(duration(since: $0))" } ?? "")
+        case .waitingOnChecks: "waiting on CI"
+        case .waitingOnStack(let number): "waiting on #\(number) below"
+        case .draft: "draft"
+        }
+    }
+
+    /// The quiet facts after the next step. They add what the next step does not already say.
     func facts(about pr: PullRequest) -> [String] {
         var facts = ["\(pr.repository) #\(pr.number)"]
-        guard pr.author == viewer else {
-            return facts + [pr.author] + checksFact(pr)
+        let isMine = pr.author == viewer
+        let steps = nextSteps(for: pr)
+        if pr.isDraft, steps != [.draft] { facts.append("draft") }
+        if isMine, steps[0].isMine, !pr.requestedReviewers.isEmpty {
+            facts.append("waiting on \(pr.requestedReviewers.joined(separator: ", "))")
         }
-        if status(of: pr) == .ready { facts.append("ready to merge") }
-        if pr.isDraft { facts.append("draft") }
-        facts += checksFact(pr)
-        if pr.mergeability == .conflicting { facts.append("conflicts") }
+        switch pr.checks {
+        case .failing where !isMine: facts.append("CI failing")
+        case .pending: facts.append("CI running")
+        case .passing: facts.append("CI passing")
+        case .failing, .none: break
+        }
+        guard isMine else { return facts }
         switch pr.approval {
         case .approved: facts.append("approved")
         case .changesRequested: facts.append("changes requested")
         case .reviewRequired, nil: break
         }
-        if !pr.requestedReviewers.isEmpty {
-            facts.append("waiting on \(pr.requestedReviewers.joined(separator: ", "))")
-        }
         return facts + botFacts(pr)
     }
 
-    private func checksFact(_ pr: PullRequest) -> [String] {
-        switch pr.checks {
-        case .failing: ["CI failing"]
-        case .pending: ["CI running"]
-        case .passing: ["CI passing"]
-        case .none: []
-        }
-    }
-
-    /// Bots are kept apart from people: their latest review is a note, not an approval.
+    /// Bots are kept apart from people: their latest review is a note, not something to answer.
     private func botFacts(_ pr: PullRequest) -> [String] {
         Dictionary(grouping: pr.reviews.filter(\.isBot), by: \.author)
             .sorted { $0.key < $1.key }
@@ -49,7 +66,11 @@ extension Snapshot {
 
     /// How long before this snapshot the pull request last changed.
     func age(of pr: PullRequest) -> String {
-        let seconds = max(0, fetchedAt.timeIntervalSince(pr.updatedAt))
+        duration(since: pr.updatedAt)
+    }
+
+    private func duration(since date: Date) -> String {
+        let seconds = max(0, fetchedAt.timeIntervalSince(date))
         return switch seconds {
         case ..<3600: "\(Int(seconds / 60))m"
         case ..<86400: "\(Int(seconds / 3600))h"

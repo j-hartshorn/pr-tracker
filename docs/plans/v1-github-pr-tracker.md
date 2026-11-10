@@ -6,9 +6,11 @@ A local macOS app in Swift that tracks the GitHub PRs I'm involved with and noti
 
 | Topic | Decision |
 | --- | --- |
-| App shape | Menu bar item plus a full window. The window is one page of sections from top to bottom, not tabs. |
+| App shape | Menu bar item plus a full window. The window is one page with two sections: Needs attention, then Mine as stacks. |
+| Rows | Each row leads with its next step: who has the ball. A click opens GitHub. A right-click offers the draft actions. |
+| Needs addressing | A review needs me when a thread is unanswered, or when a reviewer who did not approve has seen no commit, reply or new request since. |
 | Stacks | Inferred from base-branch chains. A PR whose base branch is another open PR's head branch is stacked on it. |
-| Drafts | List them, with "Mark ready" and "Convert to draft" actions. |
+| Drafts | "Mark ready" and "Convert to draft" on right-click, with a confirmation. |
 | Review requests | A PR is mine only if I'm requested by name (`user-review-requested:@me`). Team requests, with or without another person named, are ignored in v1. |
 | Bot reviews | A bot review notifies only when it has comments. Every bot review shows as a quiet line on the PR row, separate from reviews by people. |
 | Status colours | Hairline gains three status colours (failing, attention, ready), used on status glyphs only. |
@@ -29,9 +31,9 @@ These are my defaults. Change any of them before I start.
 8. **Auth**: the app asks `gh auth token` for a token. It stores no credentials of its own.
 9. **First run** records a baseline and sends no notifications, so I don't get 20 at once.
 
-10. **Status meanings** are as defined in "PR status" below. In particular, a stacked PR only counts as ready when nothing open sits beneath it.
+10. **Next steps** are as defined in "Next steps" below. In particular, a stacked PR only counts as ready when nothing open sits beneath it.
 
-11. **Bot reviews don't change a PR's status.** Bot comments show on the bot line and notify, but they don't turn the PR amber.
+11. **Bot reviews don't change a PR's next step.** Bot comments show on the bot line and notify, but a thread where a bot spoke last is not one to answer.
 
 ## Verified so far
 
@@ -95,16 +97,27 @@ GitHub computes `mergeable` lazily and often returns `UNKNOWN`. An `UNKNOWN` kee
 
 Review-posted events are collapsed to one notification per PR and reviewer per poll, so a reviewer who posts five separate comments sends one notification, not five.
 
-## PR status
+## Next steps
 
-Every PR has exactly one status, from one pure function `status(of:)`. The first matching row wins.
+Every PR has a next step that says who has the ball, from one pure function `nextSteps(for:)`. A PR shows every step that is mine, or else the one thing it waits on.
 
-| Status | Colour | Means |
-| --- | --- | --- |
-| Failing | Red | My PR has failed or errored CI, or a merge conflict. |
-| Attention | Amber | The next move is mine: changes were requested on my PR, or my review is requested by name. |
-| Ready | Green | My PR is not a draft, is approved, has green CI and no conflicts, and nothing open sits beneath it in its stack. |
-| Waiting | None (`ink-muted`) | Everything else: CI running, waiting on reviewers, drafts. |
+| Ball is with | Next step | When | Colour |
+| --- | --- | --- | --- |
+| Me | `review for alice` | Someone else's PR requests my review by name. | Amber |
+| Me | `answer 2 comments` | Open review threads where another person spoke last. | Amber |
+| Me | `respond to carol` | Carol commented or requested changes, is not asked again, and has seen no commit or reply from me since. Shown only when no thread is unanswered. | Amber |
+| Me | `fix CI` | Checks failed or errored. Applies to drafts too. | Red |
+| Me | `resolve conflicts` | There is a merge conflict. Applies to drafts too. | Red |
+| Me | `request a review` | Not a draft, not approved, nobody is asked, and no review is waiting on me. | Amber |
+| Me | `ready to merge` | Not a draft, approved, checks not failing or running, no conflicts, and nothing open beneath it in its stack. | Green |
+| Others | `waiting on bob for 3d` | Reviewers are asked. The time is since the longest-waiting one was asked. | None |
+| Others | `waiting on CI` | Approved, and checks are still running. | None |
+| Others | `waiting on #175 below` | Approved and green, but stacked on an open PR. | None |
+| Nobody | `draft` | A draft with nothing broken and nothing to answer. | None |
+
+The Needs attention section lists the PRs whose first step is mine, in the order of the table. A PR's colour is that of its most urgent step: red, then amber, then green.
+
+Handing the ball back: replying in a thread answers it, and a commit or a reply after a review moves the PR from `respond to carol` to `request a review`. Asking Carol again moves it to `waiting on carol`.
 
 ## Design system mapping
 
@@ -140,7 +153,7 @@ Each slice leaves a working app.
    Verify: decoding tests against a recorded response, and the menu shows live PR counts.
 3. **Events and notifications.** `diff`, snapshot persistence, the poll loop, the four notifications.
    Verify: tests for every row of the event table, the `UNKNOWN` rule and the first-run baseline.
-4. **Window and Hairline.** Tokens, fonts, light and dark themes, `status(of:)`, and two sections: reviews requested of me, and my PRs waiting on reviewers. Add the status tokens and their rules to `docs/design-system` (`tokens.json`, `tokens.css` and `README.md`, edited by hand as there is no generator in the repo).
+4. **Window and Hairline.** Tokens, fonts, light and dark themes, the next-step rules, and the sections of the window. Add the status tokens and their rules to `docs/design-system` (`tokens.json`, `tokens.css` and `README.md`, edited by hand as there is no generator in the repo).
    Verify: tests for each status row and its precedence, and by eye in both appearances against `docs/design-system/index.html`, using `swift run Previews`.
 5. **Stacks.** `stacks(from:)` and the stack view, with review, conflict and CI state per PR.
    Verify: tests for a chain, a branching stack, a single PR and a fork.

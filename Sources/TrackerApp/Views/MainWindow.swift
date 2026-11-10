@@ -2,10 +2,9 @@ import Hairline
 import SwiftUI
 import TrackerCore
 
-/// Everything on one page, as sections from top to bottom.
+/// One page: what needs me, then everything of mine.
 public struct MainWindow: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openURL) private var openURL
 
     public init() {}
 
@@ -55,30 +54,15 @@ public struct MainWindow: View {
 
     private func sections(_ snapshot: Snapshot) -> some View {
         VStack(alignment: .leading, spacing: Space.s5) {
-            section("To review", snapshot.reviewRequested, in: snapshot, emptyText: "No reviews are waiting on you.") { pr in
-                // The accent marks the one suggested next action: the review at the top.
-                Button("Review") { openURL(pr.url) }
-                    .buttonStyle(.hairline(pr.id == snapshot.reviewRequested.first?.id ? .accent : .standard, size: .small))
-            }
-            section("Mine", rows: PullRequestListRow.rows(from: snapshot.stacks), in: snapshot, emptyText: "You have no open pull requests.") { pr in
-                Button(pr.isDraft ? "Mark ready" : "Convert to draft") { setDraft(!pr.isDraft, for: pr) }
-                    .buttonStyle(.hairline(.quiet, size: .small))
-            }
             section(
-                "Awaiting review", snapshot.authored.filter { !$0.isDraft && !$0.requestedReviewers.isEmpty },
-                in: snapshot, emptyText: "None of your pull requests are waiting on a reviewer."
-            ) { _ in }
-            section("Drafts", snapshot.authored.filter(\.isDraft), in: snapshot, emptyText: "You have no drafts.") { pr in
-                Button("Mark ready") { setDraft(false, for: pr) }
-                    .buttonStyle(.hairline(size: .small))
-            }
+                "Needs attention", rows: snapshot.needingAttention.map { PullRequestListRow(pullRequest: $0) },
+                in: snapshot, emptyText: "Nothing needs you right now."
+            )
+            section("Mine", rows: PullRequestListRow.rows(from: snapshot.stacks), in: snapshot, emptyText: "You have no open pull requests.")
         }
     }
 
-    private func section<Trailing: View>(
-        _ title: String, rows: [PullRequestListRow], in snapshot: Snapshot, emptyText: String,
-        @ViewBuilder trailing: @escaping (PullRequest) -> Trailing
-    ) -> some View {
+    private func section(_ title: String, rows: [PullRequestListRow], in snapshot: Snapshot, emptyText: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
                 Text(title).textStyle(.heading).foregroundStyle(Palette.ink)
@@ -86,15 +70,8 @@ public struct MainWindow: View {
             }
             .padding(.bottom, Space.s2)
             Rule()
-            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText, trailing: trailing)
+            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText, setDraft: setDraft)
         }
-    }
-
-    private func section<Trailing: View>(
-        _ title: String, _ pullRequests: [PullRequest], in snapshot: Snapshot, emptyText: String,
-        @ViewBuilder trailing: @escaping (PullRequest) -> Trailing
-    ) -> some View {
-        section(title, rows: pullRequests.map { PullRequestListRow(pullRequest: $0) }, in: snapshot, emptyText: emptyText, trailing: trailing)
     }
 
     /// Asks first, because both directions are visible to other people.
