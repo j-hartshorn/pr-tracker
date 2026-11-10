@@ -25,7 +25,7 @@ struct PullRequestRow: View {
                         .textStyle(.control)
                         .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
-                    Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
+                    Text("\(Text("#\(pullRequest.number)").font(TextStyle.labelStrong.font)) \(snapshot.facts(about: pullRequest).joined(separator: " · "))")
                         .textStyle(.label)
                         .foregroundStyle(quiet)
                         .lineLimit(2)

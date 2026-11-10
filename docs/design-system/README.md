@@ -72,7 +72,7 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 
 - **Iosevka Aile** for prose: headings, body text, buttons. It is the quasi-proportional sibling of Iosevka, so the two faces share the same skeleton.
 - **Iosevka** for code, data and labels. Numbers align in columns.
-- Weights: 300 for display, 400 for most text, 600 for subheadings only. No bold in running text.
+- Weights: 300 for display, 400 for most text, 600 for subheadings, and for the one item a list row is found by, such as its number. No bold in running text.
 - Sentence case everywhere. Never all caps.
 - Keep body lines under 72 characters.
 

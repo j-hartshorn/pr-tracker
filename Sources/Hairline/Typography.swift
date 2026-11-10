@@ -18,6 +18,7 @@ public struct TextStyle: Sendable {
     public static let code = TextStyle(fontName: "Iosevka", size: 14, lineHeight: 22)
     public static let data = TextStyle(fontName: "Iosevka", size: 14, lineHeight: 20)
     public static let label = TextStyle(fontName: "Iosevka", size: 12, lineHeight: 16)
+    public static let labelStrong = TextStyle(fontName: "Iosevka-Semibold", size: 12, lineHeight: 16)
 
     /// For a run inside a larger text. Prefer `textStyle(_:)`, which also sets the line height.
     public var font: Font { .custom(fontName, fixedSize: size) }
