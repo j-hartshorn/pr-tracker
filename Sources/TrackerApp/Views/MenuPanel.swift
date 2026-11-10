@@ -52,6 +52,7 @@ public struct MenuPanel: View {
         }
         .padding(Space.s3)
         .frame(width: 420, alignment: .leading)
+        .overlay(alignment: .bottom) { CopiedLinkToast().padding(Space.s3) }
         .background(Palette.bg)
     }
 }

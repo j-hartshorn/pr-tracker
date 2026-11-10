@@ -4,7 +4,7 @@ A macOS menu bar app that tracks the GitHub pull requests I'm involved with and 
 
 - **Notifies** when my review is requested by name, when someone reviews one of my pull requests, and when one of mine fails CI or gets a merge conflict.
 - **Menu bar**: a square glyph showing the most urgent status, with a dropdown of the pull requests that need something, one line each.
-- **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link.
+- **Window**: what needs me, then all my pull requests as stacks. Every row says who has the ball: `answer 2 comments`, `waiting on bob for 3d`, `ready to merge`. A click opens GitHub, and a right-click copies the link, with a brief "Copied" toast.
 
 It polls GitHub every 60 seconds with the token from the `gh` CLI. It stores no credentials.
 

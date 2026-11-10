@@ -35,6 +35,7 @@ struct ComponentSheet: View {
             .textStyle(.control)
             .foregroundStyle(Palette.ink)
             Rule()
+            Toast("Copied the link to #201")
             AlertBox(.warning, title: "This draft is 3 days old", detail: "Someone else may have edited it. Reload to see the latest version.")
             AlertBox(.error, title: "Your post was not published", detail: "The title is empty. Add a title, then publish again.")
             HStack(alignment: .firstTextBaseline, spacing: Space.s4) {

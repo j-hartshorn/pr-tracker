@@ -33,6 +33,7 @@ public struct MainWindow: View {
             Spacer(minLength: 0)
         }
         .frame(minWidth: 640, minHeight: 360, alignment: .topLeading)
+        .overlay(alignment: .bottom) { CopiedLinkToast().padding(Space.s4) }
         .background(Palette.bg)
     }
 

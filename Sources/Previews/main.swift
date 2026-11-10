@@ -20,11 +20,12 @@ let model = AppModel(client: GitHubClient(), file: file, notify: { _ in })
 let missingFile = SnapshotFile(url: FileManager.default.temporaryDirectory.appending(path: "gh-tracker-previews/missing.json"))
 let failingModel = AppModel(client: GitHubClient(token: { throw GitHubError.ghFailed("not logged in") }), file: missingFile, notify: { _ in })
 await failingModel.refresh()
+let copier = LinkCopier()
 
 for (name, appearance) in [("paper", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
-    try render(MainWindow().environment(model), size: CGSize(width: 820, height: 1180), appearance: appearance, to: output.appending(path: "window-\(name).png"))
-    try render(MainWindow().environment(failingModel), size: CGSize(width: 820, height: 400), appearance: appearance, to: output.appending(path: "window-error-\(name).png"))
-    try render(MenuPanel().environment(model), size: CGSize(width: 420, height: 520), appearance: appearance, to: output.appending(path: "menu-\(name).png"))
+    try render(MainWindow().environment(model).environment(copier), size: CGSize(width: 820, height: 1180), appearance: appearance, to: output.appending(path: "window-\(name).png"))
+    try render(MainWindow().environment(failingModel).environment(copier), size: CGSize(width: 820, height: 400), appearance: appearance, to: output.appending(path: "window-error-\(name).png"))
+    try render(MenuPanel().environment(model).environment(copier), size: CGSize(width: 420, height: 520), appearance: appearance, to: output.appending(path: "menu-\(name).png"))
     try render(SettingsView().environment(LaunchAtLogin()), size: CGSize(width: 420, height: 140), appearance: appearance, to: output.appending(path: "settings-\(name).png"))
     try render(ComponentSheet(), size: CGSize(width: 820, height: 520), appearance: appearance, to: output.appending(path: "components-\(name).png"))
 }

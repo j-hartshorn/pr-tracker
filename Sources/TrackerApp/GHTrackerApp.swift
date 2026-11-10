@@ -8,6 +8,7 @@ public struct GHTrackerApp: App {
     // Held with let and not @State, because @State needs a compiler plugin that ships only with Xcode.
     private let model: AppModel
     private let launchAtLogin = LaunchAtLogin()
+    private let copier = LinkCopier()
 
     public init() {
         if let resources = Bundle.main.resourceURL {
@@ -26,6 +27,7 @@ public struct GHTrackerApp: App {
         Window("PR Tracker", id: Self.windowID) {
             MainWindow()
                 .environment(model)
+                .environment(copier)
                 .containerBackground(Palette.bg, for: .window)
                 .joinsDockWhileOpen()
         }
@@ -49,6 +51,7 @@ public struct GHTrackerApp: App {
         MenuBarExtra {
             MenuPanel()
                 .environment(model)
+                .environment(copier)
         } label: {
             MenuBarIcon(status: model.snapshot?.mostUrgentStatus ?? .waiting)
         }
