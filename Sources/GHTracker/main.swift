@@ -1,0 +1,3 @@
+import TrackerApp
+
+GHTrackerApp.main()
