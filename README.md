@@ -46,6 +46,7 @@ Each layer only knows about the ones below it.
 | `Sources/TrackerApp` | The app: the poll loop (`AppModel`), notifications, and the views. |
 | `Sources/GHTracker` | The executable. It only starts the app. |
 | `Sources/Previews` | A tool that renders the views with made-up data. |
+| `Support` | The app bundle's `Info.plist` and icon. |
 | `docs/design-system` | Hairline's rules and tokens. The source of truth for `Sources/Hairline`. |
 | `docs/plans` | The plan for v1 and the decisions behind it. |
 
@@ -59,6 +60,7 @@ Each layer only knows about the ones below it.
 - **What data is fetched**: `GitHub/OverviewQuery.swift` if the field can change without the pull request being updated, such as checks. Otherwise `GitHub/DetailsQuery.swift`. Add the field to the query, the decoding and `PullRequest`, and check the cost with `rateLimit { cost }`.
 - **The sections of the window**: `TrackerApp/Views/MainWindow.swift`.
 - **A row**: `Views/PullRequestRow.swift` in the window, `Views/CompactPullRequestRow.swift` in the menu panel. Both use `Views/PullRequestLink.swift` for click and right-click.
+- **The app icon**: `Support/AppIcon.svg`. `scripts/bundle.sh` makes the `.icns` from it.
 - **Colours, type and spacing**: `docs/design-system` first, then `Sources/Hairline`.
 
 ## Limits of building without Xcode

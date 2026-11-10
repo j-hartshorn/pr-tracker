@@ -97,6 +97,14 @@ Alerts do not use colour. A status glyph in a list can (see "Status colours" abo
 
 None yet. If you add icons: 1px stroke, square ends, 16px or 20px grid, in `ink` or `ink-muted`.
 
+## App icon
+
+- The mark is the glyph's outlined square with three bars inside it: a short list.
+- It is drawn on a 1024 grid. The square is 480 wide with a 44 outline. Each bar is 262 by 44. Every gap, between bars and from a bar to the outline, is 65.
+- The tile is `bg` and the mark is `ink`, with nothing else on it.
+- The tile is 824 wide with rounded corners. This is the one exception to "corners are sharp": macOS gives every app icon this shape, and adds its own edge and shadow.
+- The icon in the app bundle (`Support/AppIcon.svg`) is Paper.
+
 ## Fonts
 
 Both fonts are by Belleve Invis, under the SIL Open Font License (`fonts/LICENSE-OFL.txt`). Latin subset, from Fontsource.
