@@ -1,4 +1,5 @@
 import AppKit
+import TrackerCore
 import UserNotifications
 import os
 
@@ -21,17 +22,16 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate, Sendable {
         }
     }
 
-    func post(id: String, title: String, body: String, url: URL) async {
+    func post(_ event: Event) async {
         let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
+        content.title = event.title
+        content.body = event.body
         content.sound = .default
-        content.userInfo = [Self.urlKey: url.absoluteString]
+        content.userInfo = [Self.urlKey: event.url.absoluteString]
         do {
-            try await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: id, content: content, trigger: nil))
-            log.info("posted notification \(id, privacy: .public)")
+            try await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: event.id, content: content, trigger: nil))
         } catch {
-            log.error("posting notification \(id, privacy: .public) failed: \(error)")
+            log.error("posting notification failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
