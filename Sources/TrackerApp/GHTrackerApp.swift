@@ -29,6 +29,7 @@ public struct GHTrackerApp: App {
                 .environment(model)
                 .environment(copier)
                 .containerBackground(Palette.bg, for: .window)
+                .darkWhenSet()
                 .joinsDockWhileOpen(model)
         }
         .defaultSize(width: 860, height: 900)
@@ -46,6 +47,7 @@ public struct GHTrackerApp: App {
                 .environment(model)
                 .environment(launchAtLogin)
                 .containerBackground(Palette.bg, for: .window)
+                .darkWhenSet()
                 .joinsDockWhileOpen(model)
         }
 
@@ -53,6 +55,7 @@ public struct GHTrackerApp: App {
             MenuPanel()
                 .environment(model)
                 .environment(copier)
+                .darkWhenSet()
         } label: {
             MenuBarIcon(status: model.snapshot?.mostUrgentStatus ?? .waiting)
         }

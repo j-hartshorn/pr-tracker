@@ -4,6 +4,7 @@ import SwiftUI
 public struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(LaunchAtLogin.self) private var launchAtLogin
+    @AppStorage(DarkMode.key) private var usesDarkMode = false
 
     public init() {}
 
@@ -13,6 +14,15 @@ public struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Open at login").textStyle(.control).foregroundStyle(Palette.ink)
                     Text("Start PR Tracker when you log in, so notifications arrive from the start of the day.")
+                        .textStyle(.small)
+                        .foregroundStyle(Palette.inkMuted)
+                }
+            }
+            .toggleStyle(.hairlineCheckbox)
+            Toggle(isOn: $usesDarkMode) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Use dark mode").textStyle(.control).foregroundStyle(Palette.ink)
+                    Text("When this is off, PR Tracker follows the system.")
                         .textStyle(.small)
                         .foregroundStyle(Palette.inkMuted)
                 }
