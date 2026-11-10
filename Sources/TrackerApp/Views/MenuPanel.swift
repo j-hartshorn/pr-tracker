@@ -19,10 +19,14 @@ public struct MenuPanel: View {
             }
             if let snapshot = model.snapshot {
                 let pullRequests = snapshot.needingAttention
-                PullRequestList(
-                    rows: pullRequests.prefix(Self.rowLimit).map { PullRequestListRow(pullRequest: $0) },
-                    snapshot: snapshot, emptyText: "Nothing needs you right now."
-                )
+                if pullRequests.isEmpty {
+                    Text("Nothing needs you right now.")
+                        .textStyle(.small)
+                        .foregroundStyle(Palette.inkMuted)
+                }
+                ForEach(pullRequests.prefix(Self.rowLimit)) { pullRequest in
+                    CompactPullRequestRow(pullRequest: pullRequest, snapshot: snapshot)
+                }
                 if pullRequests.count > Self.rowLimit {
                     Text("And \(pullRequests.count - Self.rowLimit) more in the window.")
                         .textStyle(.small)
@@ -30,18 +34,19 @@ public struct MenuPanel: View {
                         .padding(.top, Space.s2)
                 }
             }
-            HStack(spacing: Space.s3) {
+            Rule().padding(.top, Space.s3)
+            HStack(spacing: Space.s2) {
                 Button("Open window") {
                     openWindow(id: GHTrackerApp.windowID)
                     NSApplication.shared.activate()
                 }
                 .buttonStyle(.hairline(size: .small))
                 Spacer()
-                Button("Refresh") { Task { await model.refresh(everything: true) } }
-                    .buttonStyle(.hairline(.quiet, size: .small))
+                Button(model.isRefreshing ? "Refreshing" : "Refresh") { Task { await model.refresh(everything: true) } }
+                    .buttonStyle(.hairline(size: .small))
                     .disabled(model.isRefreshing)
                 Button("Quit") { NSApplication.shared.terminate(nil) }
-                    .buttonStyle(.hairline(.quiet, size: .small))
+                    .buttonStyle(.hairline(size: .small))
             }
             .padding(.top, Space.s3)
         }

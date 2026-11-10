@@ -73,7 +73,7 @@ public struct MainWindow: View {
             }
             .padding(.bottom, Space.s2)
             Rule()
-            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText, showsNextStepColumn: true)
+            PullRequestList(rows: rows, snapshot: snapshot, emptyText: emptyText)
         }
     }
 }

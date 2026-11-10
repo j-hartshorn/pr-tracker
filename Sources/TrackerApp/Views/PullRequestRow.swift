@@ -12,8 +12,6 @@ struct PullRequestRow: View {
     let pullRequest: PullRequest
     let snapshot: Snapshot
     var depth = 0
-    /// The next step gets its own column where there is room. Otherwise it leads the second line.
-    var showsNextStepColumn = false
 
     var body: some View {
         let status = snapshot.status(of: pullRequest)
@@ -27,18 +25,17 @@ struct PullRequestRow: View {
                         .textStyle(.control)
                         .foregroundStyle(pullRequest.isDraft ? Palette.lineStrong : Palette.ink)
                         .lineLimit(1)
-                    // The facts alone sit on the label's own 16pt line. Mixed with the larger next step they need 20.
-                    (showsNextStepColumn ? facts : Text("\(nextSteps)   \(facts)"))
-                        .lineHeight(.exact(points: showsNextStepColumn ? 16 : 20))
+                    Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
+                        .textStyle(.label)
+                        .foregroundStyle(quiet)
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if showsNextStepColumn {
-                    nextSteps
-                        .lineHeight(.exact(points: 20))
-                        .lineLimit(2)
-                        .frame(width: Self.nextStepColumnWidth, alignment: .leading)
-                }
+                Text(snapshot.nextStepsText(for: pullRequest))
+                    .textStyle(.control)
+                    .foregroundStyle(isParked ? Palette.lineStrong : Palette.ink)
+                    .lineLimit(2)
+                    .frame(width: Self.nextStepColumnWidth, alignment: .leading)
                 Text(snapshot.age(of: pullRequest))
                     .textStyle(.label)
                     .foregroundStyle(quiet)
@@ -58,18 +55,6 @@ struct PullRequestRow: View {
 
     private var quiet: Color {
         isParked ? Palette.lineStrong : Palette.inkMuted
-    }
-
-    private var nextSteps: Text {
-        Text(snapshot.nextStepsText(for: pullRequest))
-            .font((showsNextStepColumn ? TextStyle.control : .small).font)
-            .foregroundStyle(isParked ? Palette.lineStrong : Palette.ink)
-    }
-
-    private var facts: Text {
-        Text(snapshot.facts(about: pullRequest).joined(separator: " · "))
-            .font(TextStyle.label.font)
-            .foregroundStyle(quiet)
     }
 
     /// One vertical hairline for each pull request beneath this one in its stack. Each indent is one glyph wide, so a line runs down from the centre of the glyph it belongs to.

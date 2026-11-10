@@ -19,7 +19,6 @@ struct PullRequestList: View {
     let rows: [PullRequestListRow]
     let snapshot: Snapshot
     let emptyText: String
-    var showsNextStepColumn = false
 
     var body: some View {
         if rows.isEmpty {
@@ -30,7 +29,7 @@ struct PullRequestList: View {
         } else {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(rows) { row in
-                    PullRequestRow(pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth, showsNextStepColumn: showsNextStepColumn)
+                    PullRequestRow(pullRequest: row.pullRequest, snapshot: snapshot, depth: row.depth)
                     Rule()
                 }
             }
