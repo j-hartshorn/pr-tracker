@@ -18,8 +18,13 @@ import Testing
         #expect(steps(theirs, in: .fixture(reviewRequested: [theirs])) == [.review])
     }
 
-    @Test func answerCommentsWhenThreadsAreUnanswered() {
-        #expect(steps(.fixture(requestedReviewers: ["bob"], unansweredThreads: 2)) == [.answerComments(2)])
+    @Test func answerCommentsWhenThreadsAreOpenAndNobodyIsAsked() {
+        #expect(steps(.fixture(unansweredThreads: 2)) == [.answerComments(2)])
+    }
+
+    @Test func aReviewRequestMeansTheOpenThreadsWaitOnTheReviewer() {
+        let pr = PullRequest.fixture(requestedReviewers: ["bob"], waitingSince: Self.t0, unansweredThreads: 2)
+        #expect(steps(pr) == [.waitingOnReviewers(["bob"], since: Self.t0)])
     }
 
     @Test(arguments: [Review.State.commented, .changesRequested])
@@ -202,7 +207,7 @@ import Testing
         let toMerge = PullRequest.fixture(1, reviewDecision: .approved)
         let waiting = PullRequest.fixture(2, requestedReviewers: ["bob"])
         let red = PullRequest.fixture(3, checks: .failing, requestedReviewers: ["bob"])
-        let toAnswer = PullRequest.fixture(4, requestedReviewers: ["bob"], unansweredThreads: 1)
+        let toAnswer = PullRequest.fixture(4, unansweredThreads: 1)
         let draft = PullRequest.fixture(5, isDraft: true)
         let toRequest = PullRequest.fixture(6)
         let toReview = PullRequest.fixture(7, author: "alice")

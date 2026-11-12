@@ -29,9 +29,9 @@ import Testing
     }
 
     @Test func countsOpenThreadsIBeganWhereAnotherPersonSpokeLast() throws {
-        func thread(resolved: Bool = false, first: String, last: String, lastType: String = "User") -> String {
+        func thread(resolved: Bool = false, first: String, last: String, lastType: String = "User", reacted: Bool = false) -> String {
             """
-            {"isResolved": \(resolved), "first": {"nodes": [{"author": {"login": "\(first)"}}]}, "last": {"nodes": [{"author": {"__typename": "\(lastType)", "login": "\(last)"}}]}}
+            {"isResolved": \(resolved), "first": {"nodes": [{"author": {"login": "\(first)"}}]}, "last": {"nodes": [{"author": {"__typename": "\(lastType)", "login": "\(last)"}, "reactionGroups": [{"viewerHasReacted": \(reacted)}]}]}}
             """
         }
         let threads = [
@@ -41,6 +41,7 @@ import Testing
             thread(resolved: true, first: "joe", last: "alice"),
             thread(first: "bob", last: "alice"),
             thread(first: "joe", last: "copilot", lastType: "Bot"),
+            thread(first: "joe", last: "alice", reacted: true),
             #"{"isResolved": false, "first": {"nodes": []}, "last": {"nodes": []}}"#,
         ]
         #expect(try details(threads: threads.joined(separator: ",")).unansweredThreadCount == 2)
@@ -52,6 +53,11 @@ import Testing
         let previous = Snapshot.fixture(involved: [.fixture(1, author: "alice"), .fixture(2, author: "alice")])
         let overview = Snapshot.fixture(authored: [.fixture(9)], involved: [.fixture(1, author: "alice"), updated, .fixture(3, author: "alice")])
         #expect(overview.involvedIDsNeedingDetails(since: previous) == ["acme/widgets#2", "acme/widgets#3"])
+    }
+
+    @Test func anInvolvedPullRequestWithAWaitingThreadNeedsDetailsEveryTime() {
+        let snapshot = Snapshot.fixture(involved: [.fixture(1, author: "alice"), .fixture(2, author: "alice", unansweredThreads: 1)])
+        #expect(snapshot.involvedIDsNeedingDetails(since: snapshot) == ["acme/widgets#2"])
     }
 
     @Test func fillsInFetchedDetailsAndKeepsTheRest() {

@@ -19,16 +19,16 @@ import Testing
         #expect(details.waitingSince == ISO8601DateFormatter().date(from: "2026-10-30T12:00:00Z"))
     }
 
-    @Test func countsOpenThreadsWhereAnotherPersonSpokeLast() throws {
-        // Of five threads, one is resolved, one ends with the author and one ends with a bot.
+    @Test func countsEveryOpenThreadBegunByAPerson() throws {
+        // Of six threads, one is resolved and one was begun by a bot. One begun by the author and a deleted user's both count.
         let details = try #require(try DetailsQuery.decode(Data(response.utf8))["PR_1"])
-        #expect(details.unansweredThreadCount == 2)
+        #expect(details.unansweredThreadCount == 4)
     }
 
     @Test func skipsNodesThatAreMissingAndToleratesEmptyOnes() throws {
         let json = """
         {"data": {"nodes": [null, {
-          "id": "PR_2", "author": null,
+          "id": "PR_2",
           "reviewRequests": {"nodes": [{"requestedReviewer": null}]},
           "timelineItems": {"nodes": [{"createdAt": "2026-11-01T08:00:00Z", "requestedReviewer": null}, {}]},
           "reviews": {"nodes": []},
@@ -57,6 +57,12 @@ import Testing
         #expect(overview.idsNeedingDetails(since: previous) == ["acme/widgets#2", "acme/widgets#4"])
     }
 
+    @Test func aPullRequestWithAWaitingThreadNeedsDetailsEveryTime() {
+        // A reaction does not change updatedAt, so this is the only way to see one.
+        let snapshot = Snapshot.fixture(authored: [.fixture(1), .fixture(2, unansweredThreads: 1)])
+        #expect(snapshot.idsNeedingDetails(since: snapshot) == ["acme/widgets#2"])
+    }
+
     @Test func nothingNeedsDetailsWhenNothingChanged() {
         let snapshot = Snapshot.fixture(authored: [.fixture(1), .fixture(2)])
         #expect(snapshot.idsNeedingDetails(since: snapshot).isEmpty)
@@ -83,7 +89,6 @@ import Testing
     let response = """
     {"data": {"nodes": [{
       "id": "PR_1",
-      "author": {"login": "joe"},
       "reviewRequests": {"nodes": [{"requestedReviewer": {"login": "alice"}}, {"requestedReviewer": {"slug": "platform"}}]},
       "timelineItems": {"nodes": [
         {"createdAt": "2026-10-29T12:00:00Z", "requestedReviewer": {"login": "bob"}},
@@ -93,6 +98,7 @@ import Testing
       ]},
       "reviewThreads": {"nodes": [
         {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
+        {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "bob"}}]}},
         {"isResolved": false, "comments": {"nodes": [{"author": null}]}},
         {"isResolved": true, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
         {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "joe"}}]}},

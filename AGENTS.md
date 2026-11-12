@@ -43,7 +43,8 @@ Put a rule in `Rules` with a test, not in a view.
 ## The rules that matter
 
 - **A pull request is mine to review only if I am requested by name.** Team requests are ignored.
-- **Someone else's pull request also needs me when I am mentioned on it, or when someone replies in a review thread I began.** A mention stands until I comment or review. A thread stands until I reply or it is resolved. A new review request replaces both.
+- **On my own pull request, every unresolved review thread is mine to deal with, unless a review is requested.** Who spoke last does not matter. While someone is asked to review, the pull request waits on them. Threads begun by a bot do not count.
+- **Someone else's pull request also needs me when I am mentioned on it, or when someone replies in a review thread I began.** A mention stands until I comment or review. A thread stands until I reply, react to its last comment, or it is resolved. A new review request replaces both.
 - **Every pull request has next steps** (`Rules/NextStep.swift`): the steps that are mine, or the one thing it waits on. The window, the menu bar icon and the colours all come from these.
 - **"Ignore drafts" in Settings leaves every draft, mine or not, out of what needs me**: Needs attention, the menu bar icon, the Dock bars and notifications. The draft's row under Mine does not change.
 - **Notifications come from comparing two snapshots** (`Rules/Snapshot+Events.swift`). The first snapshot is a silent baseline.
@@ -52,7 +53,7 @@ Put a rule in `Rules` with a test, not in a view.
 ## GitHub API
 
 - The budget is 5,000 GraphQL points an hour, shared with `gh`. GitHub charges for the page sizes a query asks for, not for what comes back.
-- `OverviewQuery` runs every poll and costs 3 points. `DetailsQuery` (my pull requests, about 1 point each) and `InvolvedQuery` (other people's, about 2 each) run only for pull requests whose `updatedAt` changed.
+- `OverviewQuery` runs every poll and costs 3 points. `DetailsQuery` (my pull requests, about 1 point each) and `InvolvedQuery` (other people's, about 2 each) run only for pull requests whose `updatedAt` changed, or that had a review thread waiting on me. Those are checked every poll, because a reaction, and perhaps resolving a thread, does not change `updatedAt`.
 - Before changing a query, measure it: add `rateLimit { cost }` and run it with `gh api graphql`. A version that asked for review threads on every poll cost 210 points and used the hour's budget in 24 minutes.
 - The app only reads from GitHub. Actions on a pull request are done on GitHub.
 

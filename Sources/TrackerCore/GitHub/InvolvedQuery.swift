@@ -25,7 +25,7 @@ enum InvolvedQuery {
             nodes {
               isResolved
               first: comments(first: 1) { nodes { author { login } } }
-              last: comments(last: 1) { nodes { author { __typename login } } }
+              last: comments(last: 1) { nodes { author { __typename login } reactionGroups { viewerHasReacted } } }
             }
           }
         }
@@ -68,26 +68,30 @@ enum InvolvedQuery {
     }
 
     private struct ThreadNode: Decodable {
+        struct ReactionGroup: Decodable {
+            var viewerHasReacted: Bool
+        }
         struct Comment: Decodable {
             var author: GraphQL.Actor?
+            var reactionGroups: [ReactionGroup]?
         }
         var isResolved: Bool
         var first: GraphQL.Connection<Comment>
         var last: GraphQL.Connection<Comment>
 
-        /// Open, begun by the viewer, and the last word is from another person.
+        /// Open, begun by the viewer, and the last word is from another person that the viewer has not reacted to. A reaction means "seen, nothing to answer".
         func waits(on viewer: String) -> Bool {
             guard !isResolved, first.elements.first?.author?.login == viewer, let last = last.elements.last else { return false }
-            return last.author?.__typename != "Bot" && last.author?.login != viewer
+            let reacted = (last.reactionGroups ?? []).contains { $0.viewerHasReacted }
+            return last.author?.__typename != "Bot" && last.author?.login != viewer && !reacted
         }
     }
 }
 
 extension Snapshot {
-    /// Other people's pull requests that are new or updated since `previous`.
+    /// Other people's pull requests that are new or updated since `previous`, or that had a thread waiting on me (see `idsNeedingDetails`).
     func involvedIDsNeedingDetails(since previous: Snapshot?) -> [String] {
-        let lastUpdated = Dictionary((previous?.involved ?? []).map { ($0.id, $0.updatedAt) }, uniquingKeysWith: { first, _ in first })
-        return involved.filter { lastUpdated[$0.id] != $0.updatedAt }.map(\.id)
+        Self.needingDetails(involved, previous: previous?.involved ?? [])
     }
 
     /// Fills in what waits on me on other people's pull requests: the fetched ones, and for the rest what `previous` already had.

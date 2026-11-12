@@ -14,7 +14,6 @@ enum DetailsQuery {
       nodes(ids: $ids) {
         ... on PullRequest {
           id
-          author { login }
           reviewRequests(first: 20) { nodes { requestedReviewer { ...ReviewerName } } }
           timelineItems(last: 30, itemTypes: [REVIEW_REQUESTED_EVENT]) {
             nodes { ... on ReviewRequestedEvent { createdAt requestedReviewer { ...ReviewerName } } }
@@ -23,7 +22,7 @@ enum DetailsQuery {
             nodes { id state submittedAt url author { __typename login } comments { totalCount } }
           }
           reviewThreads(first: 100) {
-            nodes { isResolved comments(last: 1) { nodes { author { __typename login } } } }
+            nodes { isResolved comments(first: 1) { nodes { author { __typename login } } } }
           }
         }
       }
@@ -43,17 +42,15 @@ enum DetailsQuery {
 
     private struct Node: Decodable {
         var id: String
-        var author: GraphQL.Actor?
         var reviewRequests: GraphQL.Connection<GraphQL.ReviewRequest>
         var timelineItems: GraphQL.Connection<GraphQL.ReviewRequest>
         var reviews: GraphQL.Connection<ReviewNode>
         var reviewThreads: GraphQL.Connection<ThreadNode>
 
         var details: PullRequestDetails {
-            let author = author?.login ?? "ghost"
-            return PullRequestDetails(
+            PullRequestDetails(
                 reviews: reviews.elements.map(\.review),
-                unansweredThreadCount: reviewThreads.elements.count { $0.isUnanswered(byAuthor: author) },
+                unansweredThreadCount: reviewThreads.elements.count(where: \.isOpen),
                 // The longest-waiting of the reviewers who are still asked.
                 waitingSince: reviewRequests.elements.compactMap(\.name).compactMap(lastRequested).min()
             )
@@ -71,10 +68,10 @@ enum DetailsQuery {
         var isResolved: Bool
         var comments: GraphQL.Connection<Comment>
 
-        /// Open, and the last word is from a person other than the author.
-        func isUnanswered(byAuthor author: String) -> Bool {
-            guard !isResolved, let last = comments.elements.last else { return false }
-            return last.author?.__typename != "Bot" && last.author?.login != author
+        /// Open, and begun by a person, not a bot. Who spoke last does not matter: on my own pull request a thread is mine to deal with until it is resolved.
+        var isOpen: Bool {
+            guard !isResolved, let first = comments.elements.first else { return false }
+            return first.author?.__typename != "Bot"
         }
     }
 
@@ -102,10 +99,18 @@ enum DetailsQuery {
 }
 
 extension Snapshot {
-    /// My pull requests that are new or updated since `previous`. Only these need their details fetched.
+    /// My pull requests that are new or updated since `previous`, or that had a thread waiting on me. Only these need their details fetched.
+    /// A reaction does not change `updatedAt`, so a waiting thread is checked again on every poll to see whether I reacted to it.
     func idsNeedingDetails(since previous: Snapshot?) -> [String] {
-        let lastUpdated = Dictionary((previous?.authored ?? []).map { ($0.id, $0.updatedAt) }, uniquingKeysWith: { first, _ in first })
-        return authored.filter { lastUpdated[$0.id] != $0.updatedAt }.map(\.id)
+        Self.needingDetails(authored, previous: previous?.authored ?? [])
+    }
+
+    static func needingDetails(_ current: [PullRequest], previous: [PullRequest]) -> [String] {
+        let known = Dictionary(previous.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return current.filter { pr in
+            guard let old = known[pr.id] else { return true }
+            return old.updatedAt != pr.updatedAt || old.unansweredThreadCount > 0
+        }.map(\.id)
     }
 
     /// Fills in the details of my pull requests: the fetched ones, and for the rest what `previous` already had.
