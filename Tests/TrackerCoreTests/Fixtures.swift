@@ -18,6 +18,7 @@ extension PullRequest {
         reviews: [Review] = [],
         unansweredThreads: Int = 0,
         lastCommitAt: Date? = nil,
+        lastCommentAt: Date? = nil,
         mentionedAt: Date? = nil
     ) -> PullRequest {
         PullRequest(
@@ -40,6 +41,7 @@ extension PullRequest {
             reviews: reviews,
             unansweredThreadCount: unansweredThreads,
             lastCommitAt: lastCommitAt,
+            lastCommentAt: lastCommentAt,
             mentionedAt: mentionedAt
         )
     }

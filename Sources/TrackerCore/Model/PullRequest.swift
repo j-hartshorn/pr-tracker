@@ -23,6 +23,8 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
     /// Open review threads where another person spoke last and the viewer has not reacted. On someone else's pull request, only threads the viewer began.
     public var unansweredThreadCount: Int
     public var lastCommitAt: Date?
+    /// On my pull requests: when the last non-bot conversation comment in the latest 30 was posted.
+    public var lastCommentAt: Date?
     /// On another person's pull request: when the viewer was last mentioned, if they have not commented or reviewed since.
     public var mentionedAt: Date?
 
@@ -31,7 +33,7 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
         isDraft: Bool, baseRef: String, headRef: String, isFromFork: Bool, updatedAt: Date,
         mergeability: Mergeability, checks: Checks, reviewDecision: ReviewDecision?,
         requestedReviewers: [String], waitingSince: Date?, reviews: [Review],
-        unansweredThreadCount: Int, lastCommitAt: Date?, mentionedAt: Date? = nil
+        unansweredThreadCount: Int, lastCommitAt: Date?, lastCommentAt: Date? = nil, mentionedAt: Date? = nil
     ) {
         self.id = id
         self.number = number
@@ -52,6 +54,7 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
         self.reviews = reviews
         self.unansweredThreadCount = unansweredThreadCount
         self.lastCommitAt = lastCommitAt
+        self.lastCommentAt = lastCommentAt
         self.mentionedAt = mentionedAt
     }
 }

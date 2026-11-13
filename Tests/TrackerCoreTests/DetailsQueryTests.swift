@@ -19,6 +19,11 @@ import Testing
         #expect(details.waitingSince == ISO8601DateFormatter().date(from: "2026-10-30T12:00:00Z"))
     }
 
+    @Test func lastCommentAtIgnoresBots() throws {
+        let details = try #require(try DetailsQuery.decode(Data(response.utf8), viewer: "joe")["PR_1"])
+        #expect(details.lastCommentAt == ISO8601DateFormatter().date(from: "2026-11-01T08:30:00Z"))
+    }
+
     @Test func countsOpenThreadsWhereAnotherPersonSpokeLastWithoutMyReaction() throws {
         // Of six threads: alice and a deleted user wait on joe; bob has joe's reaction; one is resolved; one ends with joe; one ends with a bot.
         let details = try #require(try DetailsQuery.decode(Data(response.utf8), viewer: "joe")["PR_1"])
@@ -31,12 +36,13 @@ import Testing
           "id": "PR_2",
           "reviewRequests": {"nodes": [{"requestedReviewer": null}]},
           "timelineItems": {"nodes": [{"createdAt": "2026-11-01T08:00:00Z", "requestedReviewer": null}, {}]},
+          "comments": {"nodes": []},
           "reviews": {"nodes": []},
           "reviewThreads": {"nodes": [{"isResolved": false, "comments": {"nodes": []}}]}
         }]}}
         """
         let details = try DetailsQuery.decode(Data(json.utf8), viewer: "joe")
-        #expect(details == ["PR_2": PullRequestDetails(reviews: [], unansweredThreadCount: 0, waitingSince: nil)])
+        #expect(details == ["PR_2": PullRequestDetails(reviews: [], unansweredThreadCount: 0, waitingSince: nil, lastCommentAt: nil)])
     }
 
     // MARK: Which details to fetch, and how they are filled in
@@ -72,17 +78,17 @@ import Testing
         let oldReview = Review.fixture("r-old")
         let newReview = Review.fixture("r-new")
         let previous = Snapshot.fixture(authored: [
-            .fixture(1, waitingSince: Self.t0, reviews: [oldReview], unansweredThreads: 2),
+            .fixture(1, waitingSince: Self.t0, reviews: [oldReview], unansweredThreads: 2, lastCommentAt: Self.t0),
             .fixture(2, reviews: [oldReview]),
         ])
         // The overview knows the pull requests but none of their details, and its other fields are newer.
         let overview = Snapshot.fixture(authored: [.fixture(1, checks: .failing), .fixture(2), .fixture(3)])
-        let fetched = ["acme/widgets#2": PullRequestDetails(reviews: [newReview], unansweredThreadCount: 1, waitingSince: Self.t1)]
+        let fetched = ["acme/widgets#2": PullRequestDetails(reviews: [newReview], unansweredThreadCount: 1, waitingSince: Self.t1, lastCommentAt: Self.t1)]
 
         let filled = overview.withDetails(fetched, reusing: previous)
 
-        #expect(filled.authored[0] == .fixture(1, checks: .failing, waitingSince: Self.t0, reviews: [oldReview], unansweredThreads: 2))
-        #expect(filled.authored[1] == .fixture(2, waitingSince: Self.t1, reviews: [newReview], unansweredThreads: 1))
+        #expect(filled.authored[0] == .fixture(1, checks: .failing, waitingSince: Self.t0, reviews: [oldReview], unansweredThreads: 2, lastCommentAt: Self.t0))
+        #expect(filled.authored[1] == .fixture(2, waitingSince: Self.t1, reviews: [newReview], unansweredThreads: 1, lastCommentAt: Self.t1))
         #expect(filled.authored[2] == .fixture(3))
     }
 
@@ -95,6 +101,11 @@ import Testing
         {"createdAt": "2026-10-29T13:00:00Z", "requestedReviewer": {"login": "alice"}},
         {"createdAt": "2026-10-30T12:00:00Z", "requestedReviewer": {"slug": "platform"}},
         {"createdAt": "2026-10-31T12:00:00Z", "requestedReviewer": {"login": "alice"}}
+      ]},
+      "comments": {"nodes": [
+        {"createdAt": "2026-11-01T07:00:00Z", "author": {"__typename": "User", "login": "alice"}},
+        {"createdAt": "2026-11-01T08:30:00Z", "author": null},
+        {"createdAt": "2026-11-01T10:00:00Z", "author": {"__typename": "Bot", "login": "github-actions"}}
       ]},
       "reviewThreads": {"nodes": [
         {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}, "reactionGroups": [{"viewerHasReacted": false}]}]}},

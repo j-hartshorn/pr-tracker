@@ -17,6 +17,7 @@ struct GitHubClientLiveTests {
             #expect(pr.reviews == before.reviews)
             #expect(pr.unansweredThreadCount == before.unansweredThreadCount)
             #expect(pr.waitingSince == before.waitingSince)
+            #expect(pr.lastCommentAt == before.lastCommentAt)
         }
     }
 }

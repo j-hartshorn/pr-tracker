@@ -112,7 +112,7 @@ GitHub allows 5,000 GraphQL points an hour, shared with `gh` and every other too
 That is about 120 points an hour when nothing changes. The first version fetched everything on every poll, at 210 points, and used up the hour's budget in about 24 minutes.
 
 - **Overview** has the fields that change without the PR being updated: checks, mergeability and requested reviewers.
-- **Details** has reviews, review threads and review request times. These only change when the PR is updated, so the last snapshot's copy is reused until then. The exception is a PR with a thread waiting on me, which is fetched every poll: a reaction does not touch `updatedAt`, and resolving a thread may not either.
+- **Details** has reviews, review threads, review request times and conversation comment times. These only change when the PR is updated, so the last snapshot's copy is reused until then. The exception is a PR with a thread waiting on me, which is fetched every poll: a reaction does not touch `updatedAt`, and resolving a thread may not either.
 - **The Refresh button** fetches every PR's details again, in case GitHub changes something without touching `updatedAt`.
 - **When GitHub says the limit was hit**, the app sends nothing until the reset time GitHub gives, and says so in the window.
 
@@ -131,7 +131,7 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Me | `resolve conflicts` | There is a merge conflict. Applies to drafts too. | Red |
 | Me | `request a review` | Not a draft, not approved, nobody is asked, and no review is waiting on me. | Amber |
 | Me | `ready to merge` | Not a draft, approved, checks not failing or running, no conflicts, and nothing open beneath it in its stack. | Green |
-| Others | `waiting on bob for 3d` | Reviewers are asked. The time is since the longest-waiting one was asked. | None |
+| Others | `waiting on bob for 3d` | Reviewers are asked. The time runs from the latest open review request, non-bot review or non-bot conversation comment. | None |
 | Others | `waiting on CI` | Approved, and checks are still running. | None |
 | Others | `waiting on #175` | Approved and green, but stacked on an open PR. | Green |
 | Others | `waiting on alice` | Someone else's PR that I took part in, with nothing for me to answer. Not listed anywhere. | None |

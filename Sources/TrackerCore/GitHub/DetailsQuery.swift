@@ -5,6 +5,7 @@ struct PullRequestDetails: Equatable {
     var reviews: [Review]
     var unansweredThreadCount: Int
     var waitingSince: Date?
+    var lastCommentAt: Date?
 }
 
 /// Fetches the details of the pull requests with the given ids.
@@ -17,6 +18,9 @@ enum DetailsQuery {
           reviewRequests(first: 20) { nodes { requestedReviewer { ...ReviewerName } } }
           timelineItems(last: 30, itemTypes: [REVIEW_REQUESTED_EVENT]) {
             nodes { ... on ReviewRequestedEvent { createdAt requestedReviewer { ...ReviewerName } } }
+          }
+          comments(last: 30) {
+            nodes { createdAt author { __typename login } }
           }
           reviews(last: 30) {
             nodes { id state submittedAt url author { __typename login } comments { totalCount } }
@@ -47,6 +51,7 @@ enum DetailsQuery {
         var id: String
         var reviewRequests: GraphQL.Connection<GraphQL.ReviewRequest>
         var timelineItems: GraphQL.Connection<GraphQL.ReviewRequest>
+        var comments: GraphQL.Connection<CommentNode>
         var reviews: GraphQL.Connection<ReviewNode>
         var reviewThreads: GraphQL.Connection<ThreadNode>
 
@@ -55,13 +60,19 @@ enum DetailsQuery {
                 reviews: reviews.elements.map(\.review),
                 unansweredThreadCount: reviewThreads.elements.count { $0.waits(on: viewer) },
                 // The longest-waiting of the reviewers who are still asked.
-                waitingSince: reviewRequests.elements.compactMap(\.name).compactMap(lastRequested).min()
+                waitingSince: reviewRequests.elements.compactMap(\.name).compactMap(lastRequested).min(),
+                lastCommentAt: comments.elements.filter { $0.author?.__typename != "Bot" }.map(\.createdAt).max()
             )
         }
 
         private func lastRequested(_ reviewer: String) -> Date? {
             timelineItems.elements.filter { $0.name == reviewer }.compactMap(\.createdAt).max()
         }
+    }
+
+    private struct CommentNode: Decodable {
+        var createdAt: Date
+        var author: GraphQL.Actor?
     }
 
     private struct ThreadNode: Decodable {
@@ -122,10 +133,12 @@ extension Snapshot {
                 copy.authored[index].reviews = details.reviews
                 copy.authored[index].unansweredThreadCount = details.unansweredThreadCount
                 copy.authored[index].waitingSince = details.waitingSince
+                copy.authored[index].lastCommentAt = details.lastCommentAt
             } else if let old = known[id] {
                 copy.authored[index].reviews = old.reviews
                 copy.authored[index].unansweredThreadCount = old.unansweredThreadCount
                 copy.authored[index].waitingSince = old.waitingSince
+                copy.authored[index].lastCommentAt = old.lastCommentAt
             }
         }
         return copy

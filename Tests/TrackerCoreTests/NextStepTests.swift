@@ -136,6 +136,49 @@ import Testing
         #expect(steps(pr) == [.waitingOnReviewers(["alice", "platform"], since: Self.t0)])
     }
 
+    @Test func waitingOnReviewersUsesLatestCommentOrReviewAfterTheRequest() {
+        let afterComment = PullRequest.fixture(
+            reviewDecision: .reviewRequired,
+            requestedReviewers: ["alice"],
+            waitingSince: Self.t0,
+            lastCommentAt: Self.t1
+        )
+        #expect(steps(afterComment) == [.waitingOnReviewers(["alice"], since: Self.t1)])
+
+        let afterAuthorReply = PullRequest.fixture(
+            reviewDecision: .reviewRequired,
+            requestedReviewers: ["alice"],
+            waitingSince: Self.t0,
+            reviews: [
+                .fixture("r1", by: "alice", .commented, at: Self.t1),
+                .fixture("r2", by: "joe", .commented, at: Self.t2),
+                .fixture("r3", by: "copilot", isBot: true, .commented, at: Self.t2.addingTimeInterval(600)),
+            ],
+            lastCommentAt: Self.t1
+        )
+        #expect(steps(afterAuthorReply) == [.waitingOnReviewers(["alice"], since: Self.t2)])
+
+        let afterReRequest = PullRequest.fixture(
+            reviewDecision: .reviewRequired,
+            requestedReviewers: ["alice"],
+            waitingSince: Self.t2,
+            reviews: [.fixture("r1", by: "alice", .commented, at: Self.t1)],
+            lastCommentAt: Self.t0
+        )
+        #expect(steps(afterReRequest) == [.waitingOnReviewers(["alice"], since: Self.t2)])
+
+        let ignoringPendingAndDismissed = PullRequest.fixture(
+            reviewDecision: .reviewRequired,
+            requestedReviewers: ["alice"],
+            waitingSince: Self.t0,
+            reviews: [
+                .fixture("r1", by: "alice", .dismissed, at: Self.t1),
+                .fixture("r2", by: "alice", .pending, at: Self.t2),
+            ]
+        )
+        #expect(steps(ignoringPendingAndDismissed) == [.waitingOnReviewers(["alice"], since: Self.t0)])
+    }
+
     @Test func waitingOnChecksWhenApprovedButStillRunning() {
         #expect(steps(.fixture(checks: .pending, reviewDecision: .approved)) == [.waitingOnChecks])
         #expect(steps(.fixture(mergeability: .unknown, reviewDecision: .approved)) == [.waitingOnChecks])

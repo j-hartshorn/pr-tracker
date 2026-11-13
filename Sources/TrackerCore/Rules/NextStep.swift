@@ -71,7 +71,7 @@ extension Snapshot {
         if !mine.isEmpty { return mine }
 
         if pr.isDraft { return [.draft] }
-        if !approved { return [.waitingOnReviewers(pr.requestedReviewers, since: pr.waitingSince)] }
+        if !approved { return [.waitingOnReviewers(pr.requestedReviewers, since: pr.waitingOnReviewersSince)] }
         if canMerge, let below { return [.waitingOnStack(below: below.number)] }
         return [.waitingOnChecks]
     }
@@ -116,9 +116,17 @@ extension PullRequest {
             .keys.sorted()
     }
 
+    var waitingOnReviewersSince: Date? {
+        let reviewDates = submittedReviews.compactMap(\.submittedAt)
+        return ([waitingSince, lastCommentAt].compactMap { $0 } + reviewDates).max()
+    }
+
+    private var submittedReviews: [Review] {
+        reviews.filter { !$0.isBot && $0.state != .pending && $0.state != .dismissed }
+    }
+
     private var reviewsByPerson: [String: [Review]] {
-        let submitted = reviews.filter { !$0.isBot && $0.author != author && $0.state != .pending && $0.state != .dismissed }
-        return Dictionary(grouping: submitted, by: \.author)
+        Dictionary(grouping: submittedReviews.filter { $0.author != author }, by: \.author)
     }
 
     /// A person's latest approval or request for changes stands until they give another. A later comment does not replace it.
