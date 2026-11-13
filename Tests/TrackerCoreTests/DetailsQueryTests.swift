@@ -4,7 +4,7 @@ import Testing
 
 @Suite struct DetailsQueryTests {
     @Test func decodesReviewsFromPeopleAndBots() throws {
-        let reviews = try #require(try DetailsQuery.decode(Data(response.utf8))["PR_1"]).reviews
+        let reviews = try #require(try DetailsQuery.decode(Data(response.utf8), viewer: "joe")["PR_1"]).reviews
         #expect(reviews.map(\.id) == ["R_1", "R_2", "R_3"])
         #expect(reviews.map(\.state) == [.changesRequested, .commented, .pending])
         #expect(reviews.map(\.isBot) == [false, true, false])
@@ -15,14 +15,14 @@ import Testing
 
     @Test func waitingSinceIsTheOldestRequestStillOpen() throws {
         // alice was asked twice and platform once. bob was asked earliest but is no longer requested.
-        let details = try #require(try DetailsQuery.decode(Data(response.utf8))["PR_1"])
+        let details = try #require(try DetailsQuery.decode(Data(response.utf8), viewer: "joe")["PR_1"])
         #expect(details.waitingSince == ISO8601DateFormatter().date(from: "2026-10-30T12:00:00Z"))
     }
 
-    @Test func countsEveryOpenThreadBegunByAPerson() throws {
-        // Of six threads, one is resolved and one was begun by a bot. One begun by the author and a deleted user's both count.
-        let details = try #require(try DetailsQuery.decode(Data(response.utf8))["PR_1"])
-        #expect(details.unansweredThreadCount == 4)
+    @Test func countsOpenThreadsWhereAnotherPersonSpokeLastWithoutMyReaction() throws {
+        // Of six threads: alice and a deleted user wait on joe; bob has joe's reaction; one is resolved; one ends with joe; one ends with a bot.
+        let details = try #require(try DetailsQuery.decode(Data(response.utf8), viewer: "joe")["PR_1"])
+        #expect(details.unansweredThreadCount == 2)
     }
 
     @Test func skipsNodesThatAreMissingAndToleratesEmptyOnes() throws {
@@ -35,7 +35,7 @@ import Testing
           "reviewThreads": {"nodes": [{"isResolved": false, "comments": {"nodes": []}}]}
         }]}}
         """
-        let details = try DetailsQuery.decode(Data(json.utf8))
+        let details = try DetailsQuery.decode(Data(json.utf8), viewer: "joe")
         #expect(details == ["PR_2": PullRequestDetails(reviews: [], unansweredThreadCount: 0, waitingSince: nil)])
     }
 
@@ -97,8 +97,8 @@ import Testing
         {"createdAt": "2026-10-31T12:00:00Z", "requestedReviewer": {"login": "alice"}}
       ]},
       "reviewThreads": {"nodes": [
-        {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
-        {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "bob"}}]}},
+        {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}, "reactionGroups": [{"viewerHasReacted": false}]}]}},
+        {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "bob"}, "reactionGroups": [{"viewerHasReacted": true}]}]}},
         {"isResolved": false, "comments": {"nodes": [{"author": null}]}},
         {"isResolved": true, "comments": {"nodes": [{"author": {"__typename": "User", "login": "alice"}}]}},
         {"isResolved": false, "comments": {"nodes": [{"author": {"__typename": "User", "login": "joe"}}]}},

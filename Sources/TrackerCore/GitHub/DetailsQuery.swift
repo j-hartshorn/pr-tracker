@@ -22,7 +22,10 @@ enum DetailsQuery {
             nodes { id state submittedAt url author { __typename login } comments { totalCount } }
           }
           reviewThreads(first: 100) {
-            nodes { isResolved comments(first: 1) { nodes { author { __typename login } } } }
+            nodes {
+              isResolved
+              comments(last: 1) { nodes { author { __typename login } reactionGroups { viewerHasReacted } } }
+            }
           }
         }
       }
@@ -31,9 +34,9 @@ enum DetailsQuery {
     \(GraphQL.reviewerNameFragment)
     """
 
-    static func decode(_ data: Data) throws -> [String: PullRequestDetails] {
+    static func decode(_ data: Data, viewer: String) throws -> [String: PullRequestDetails] {
         let payload = try GraphQL.decode(Payload.self, from: data)
-        return Dictionary(payload.nodes.compactMap { $0 }.map { ($0.id, $0.details) }, uniquingKeysWith: { first, _ in first })
+        return Dictionary(payload.nodes.compactMap { $0 }.map { ($0.id, $0.details(viewer: viewer)) }, uniquingKeysWith: { first, _ in first })
     }
 
     private struct Payload: Decodable {
@@ -47,10 +50,10 @@ enum DetailsQuery {
         var reviews: GraphQL.Connection<ReviewNode>
         var reviewThreads: GraphQL.Connection<ThreadNode>
 
-        var details: PullRequestDetails {
+        func details(viewer: String) -> PullRequestDetails {
             PullRequestDetails(
                 reviews: reviews.elements.map(\.review),
-                unansweredThreadCount: reviewThreads.elements.count(where: \.isOpen),
+                unansweredThreadCount: reviewThreads.elements.count { $0.waits(on: viewer) },
                 // The longest-waiting of the reviewers who are still asked.
                 waitingSince: reviewRequests.elements.compactMap(\.name).compactMap(lastRequested).min()
             )
@@ -62,16 +65,12 @@ enum DetailsQuery {
     }
 
     private struct ThreadNode: Decodable {
-        struct Comment: Decodable {
-            var author: GraphQL.Actor?
-        }
         var isResolved: Bool
-        var comments: GraphQL.Connection<Comment>
+        var comments: GraphQL.Connection<GraphQL.ThreadComment>
 
-        /// Open, and begun by a person, not a bot. Who spoke last does not matter: on my own pull request a thread is mine to deal with until it is resolved.
-        var isOpen: Bool {
-            guard !isResolved, let first = comments.elements.first else { return false }
-            return first.author?.__typename != "Bot"
+        func waits(on viewer: String) -> Bool {
+            guard !isResolved, let last = comments.elements.last else { return false }
+            return last.isUnanswered(by: viewer)
         }
     }
 

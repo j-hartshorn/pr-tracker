@@ -23,6 +23,19 @@ enum GraphQL {
         var __typename: String?
     }
 
+    struct ThreadComment: Decodable {
+        struct ReactionGroup: Decodable {
+            var viewerHasReacted: Bool
+        }
+        var author: Actor?
+        var reactionGroups: [ReactionGroup]?
+
+        func isUnanswered(by viewer: String) -> Bool {
+            let reacted = (reactionGroups ?? []).contains { $0.viewerHasReacted }
+            return author?.__typename != "Bot" && author?.login != viewer && !reacted
+        }
+    }
+
     /// A requested reviewer, on a pull request or on a "review requested" event in its timeline.
     struct ReviewRequest: Decodable {
         struct Reviewer: Decodable {

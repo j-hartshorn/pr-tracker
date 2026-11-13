@@ -43,7 +43,7 @@ Put a rule in `Rules` with a test, not in a view.
 ## The rules that matter
 
 - **A pull request is mine to review only if I am requested by name.** Team requests are ignored.
-- **On my own pull request, every unresolved review thread is mine to deal with, unless a review is requested.** Who spoke last does not matter. While someone is asked to review, the pull request waits on them. Threads begun by a bot do not count.
+- **On my own pull request, an unresolved review thread is mine when another person spoke last and I have not reacted to that comment.** It counts even while a review is requested, because replying in a thread on GitHub does not clear a review request. Replying, reacting or resolving answers it.
 - **Someone else's pull request also needs me when I am mentioned on it, or when someone replies in a review thread I began.** A mention stands until I comment or review. A thread stands until I reply, react to its last comment, or it is resolved. A new review request replaces both.
 - **Every pull request has next steps** (`Rules/NextStep.swift`): the steps that are mine, or the one thing it waits on. The window, the menu bar icon and the colours all come from these.
 - **"Ignore drafts" in Settings leaves every draft, mine or not, out of what needs me**: Needs attention, the menu bar icon, the Dock bars and notifications. The draft's row under Mine does not change.

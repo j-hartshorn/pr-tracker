@@ -20,7 +20,7 @@ public struct PullRequest: Codable, Equatable, Identifiable, Sendable {
     /// When the longest-waiting of the requested reviewers was asked.
     public var waitingSince: Date?
     public var reviews: [Review]
-    /// Open review threads that wait on the viewer. On their own pull request, every unresolved thread begun by a person. On another person's, the viewer began the thread, someone else spoke last, and the viewer has not reacted to that comment.
+    /// Open review threads where another person spoke last and the viewer has not reacted. On someone else's pull request, only threads the viewer began.
     public var unansweredThreadCount: Int
     public var lastCommitAt: Date?
     /// On another person's pull request: when the viewer was last mentioned, if they have not commented or reviewed since.

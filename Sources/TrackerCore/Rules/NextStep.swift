@@ -4,7 +4,7 @@ import Foundation
 public enum NextStep: Equatable, Sendable {
     /// Someone else's pull request, and my review is requested by name.
     case review
-    /// On my pull request: open review threads, while nobody is asked to review. On someone else's: threads I began where another person spoke last and I have not reacted.
+    /// Open review threads where another person spoke last and I have not reacted.
     case answerComments(Int)
     /// Someone else's pull request, where I was mentioned and have not commented or reviewed since.
     case answerMention
@@ -53,11 +53,9 @@ extension Snapshot {
         let approved = pr.approval == .approved
         let below = parent(of: pr)
         var mine: [NextStep] = []
-        // While a review is requested, the open threads are for the reviewers to look at again, not for me.
-        let openThreads = pr.requestedReviewers.isEmpty ? pr.unansweredThreadCount : 0
 
-        if openThreads > 0 {
-            mine.append(.answerComments(openThreads))
+        if pr.unansweredThreadCount > 0 {
+            mine.append(.answerComments(pr.unansweredThreadCount))
         } else if !reviewers.isEmpty {
             mine.append(.respond(to: reviewers))
         }
@@ -66,7 +64,7 @@ extension Snapshot {
 
         let canMerge = pr.checks != .failing && pr.checks != .pending && pr.mergeability == .mergeable
         if !pr.isDraft {
-            let hasReviewToAnswer = openThreads > 0 || !reviewers.isEmpty
+            let hasReviewToAnswer = pr.unansweredThreadCount > 0 || !reviewers.isEmpty
             if !approved, !hasReviewToAnswer, pr.requestedReviewers.isEmpty { mine.append(.requestReview) }
             if approved, canMerge, below == nil { mine.append(.merge) }
         }

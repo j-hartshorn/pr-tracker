@@ -68,22 +68,13 @@ enum InvolvedQuery {
     }
 
     private struct ThreadNode: Decodable {
-        struct ReactionGroup: Decodable {
-            var viewerHasReacted: Bool
-        }
-        struct Comment: Decodable {
-            var author: GraphQL.Actor?
-            var reactionGroups: [ReactionGroup]?
-        }
         var isResolved: Bool
-        var first: GraphQL.Connection<Comment>
-        var last: GraphQL.Connection<Comment>
+        var first: GraphQL.Connection<GraphQL.ThreadComment>
+        var last: GraphQL.Connection<GraphQL.ThreadComment>
 
-        /// Open, begun by the viewer, and the last word is from another person that the viewer has not reacted to. A reaction means "seen, nothing to answer".
         func waits(on viewer: String) -> Bool {
             guard !isResolved, first.elements.first?.author?.login == viewer, let last = last.elements.last else { return false }
-            let reacted = (last.reactionGroups ?? []).contains { $0.viewerHasReacted }
-            return last.author?.__typename != "Bot" && last.author?.login != viewer && !reacted
+            return last.isUnanswered(by: viewer)
         }
     }
 }

@@ -8,7 +8,7 @@ A local macOS app in Swift that tracks the GitHub PRs I'm involved with and noti
 | --- | --- |
 | App shape | Menu bar item plus a full window. The window is one page with two sections: Needs attention, then Mine as stacks. |
 | Rows | Each row leads with its next step: who has the ball. A click opens GitHub. A right-click copies the link. |
-| Needs addressing | A review needs me when a thread is unresolved and nobody is asked to review, or when a reviewer who did not approve has seen no commit, reply or new request since. |
+| Needs addressing | A review needs me when a thread has an unanswered comment from another person, or when a reviewer who did not approve has seen no commit, reply or new request since. |
 | Stacks | Inferred from base-branch chains. A PR whose base branch is another open PR's head branch is stacked on it. |
 | Drafts | Shown greyed. Marking ready and converting to draft are done on GitHub: the app only reads. |
 | Review requests | A PR is mine only if I'm requested by name (`user-review-requested:@me`). Team requests, with or without another person named, are ignored in v1. |
@@ -35,7 +35,7 @@ These are my defaults. Change any of them before I start.
 
 11. **Bot reviews don't change a PR's next step.** Bot comments show on the bot line and notify, but a thread where a bot spoke last is not one to answer.
 
-12. **On my own PR, every unresolved thread is mine until I resolve it, unless a review is requested.** I am trying to merge, so a thread is work to do, whoever spoke last. If I need an answer to a comment, I ask for a review again, and while one is requested the PR waits on the reviewers. Threads begun by a bot don't count. On someone else's PR, a thread I began waits on me until I reply, react to its last comment, or it is resolved. A reaction means "seen, nothing to answer". A reaction does not change `updatedAt`, so a PR with a thread waiting on me has its details fetched every poll.
+12. **A review thread waits on me until I reply, react to its last comment, or it is resolved.** On my own PR, any open thread where another person spoke last and I have not reacted counts, even while a review is requested (an inline reply on GitHub does not clear a review request). On someone else's PR, only threads I began count. A reaction means "seen, nothing to answer". A reaction does not change `updatedAt`, so a PR with a thread waiting on me has its details fetched every poll.
 
 ## Verified so far
 
@@ -123,8 +123,8 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 | Ball is with | Next step | When | Colour |
 | --- | --- | --- | --- |
 | Me | `review for alice` | Someone else's PR requests my review by name. | Amber |
-| Me | `answer 2 comments` | Unresolved review threads begun by a person, whoever spoke last, while nobody is asked to review. With a review requested, the PR is `waiting on bob`. | Amber |
-| Me | `respond to carol` | Carol commented or requested changes, is not asked again, and has seen no commit or reply from me since. Shown only when no thread is open. | Amber |
+| Me | `answer 2 comments` | Open review threads where another person spoke last and I have not reacted, even while a review is requested. | Amber |
+| Me | `respond to carol` | Carol commented or requested changes, is not asked again, and has seen no commit or reply from me since. Shown only when no thread waits on me. | Amber |
 | Me | `answer 2 comments` | On someone else's PR: open threads I began where another person spoke last and I have not reacted. | Amber |
 | Me | `answer a mention` | On someone else's PR: I was mentioned and have not commented or reviewed since. Shown only when no thread waits on me. | Amber |
 | Me | `fix CI` | Checks failed or errored. Applies to drafts too. | Red |
@@ -139,7 +139,7 @@ Every PR has a next step that says who has the ball, from one pure function `nex
 
 The Needs attention section lists the PRs whose first step is mine, in the order of the table. A PR's colour is that of its most urgent step: red, then amber, then green. The menu bar icon shows the most urgent colour among the PRs that need me, so a green PR that waits on its stack leaves it quiet.
 
-Handing the ball back: on my PR, resolving a thread or asking for a review again hands it back. On someone else's, replying in a thread I began or reacting to its last comment answers it. A commit or a reply after a review moves the PR from `respond to carol` to `request a review`. Asking Carol again moves it to `waiting on carol`.
+Handing the ball back: replying in a thread, reacting to its last comment, or resolving it answers the thread. On my PR, a commit or a reply after a review moves it from `respond to carol` (or `answer N comments`) to `request a review`. Asking Carol again moves it to `waiting on carol`.
 
 ## Design system mapping
 

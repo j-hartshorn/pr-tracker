@@ -18,13 +18,13 @@ import Testing
         #expect(steps(theirs, in: .fixture(reviewRequested: [theirs])) == [.review])
     }
 
-    @Test func answerCommentsWhenThreadsAreOpenAndNobodyIsAsked() {
+    @Test func answerCommentsWhenThreadsAreUnanswered() {
         #expect(steps(.fixture(unansweredThreads: 2)) == [.answerComments(2)])
     }
 
-    @Test func aReviewRequestMeansTheOpenThreadsWaitOnTheReviewer() {
-        let pr = PullRequest.fixture(requestedReviewers: ["bob"], waitingSince: Self.t0, unansweredThreads: 2)
-        #expect(steps(pr) == [.waitingOnReviewers(["bob"], since: Self.t0)])
+    @Test func answerCommentsEvenWhileAReviewIsRequested() {
+        let pr = PullRequest.fixture(requestedReviewers: ["bob"], waitingSince: Self.t0, unansweredThreads: 1)
+        #expect(steps(pr) == [.answerComments(1)])
     }
 
     @Test(arguments: [Review.State.commented, .changesRequested])

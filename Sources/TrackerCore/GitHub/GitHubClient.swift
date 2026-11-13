@@ -15,7 +15,7 @@ public struct GitHubClient: Sendable {
     public func fetchSnapshot(reusing previous: Snapshot?) async throws -> Snapshot {
         let overview = try OverviewQuery.decode(await send(query: OverviewQuery.text, variables: [String: String]()), fetchedAt: Date())
         let ids = overview.idsNeedingDetails(since: previous)
-        let details = ids.isEmpty ? [:] : try DetailsQuery.decode(await send(query: DetailsQuery.text, variables: ["ids": ids]))
+        let details = ids.isEmpty ? [:] : try DetailsQuery.decode(await send(query: DetailsQuery.text, variables: ["ids": ids]), viewer: overview.viewer)
         let involvedIDs = overview.involvedIDsNeedingDetails(since: previous)
         let involved = involvedIDs.isEmpty ? [:] : try InvolvedQuery.decode(await send(query: InvolvedQuery.text, variables: ["ids": involvedIDs]), viewer: overview.viewer)
         return overview.withDetails(details, reusing: previous).withInvolvedDetails(involved, reusing: previous)
