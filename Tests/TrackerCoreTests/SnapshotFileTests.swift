@@ -23,4 +23,14 @@ import Testing
         try Data(#"{"viewer": 1}"#.utf8).write(to: file.url)
         #expect(file.load() == nil)
     }
+
+    @Test func loadsNothingFromAnUnversionedOrOlderVersionSnapshot() throws {
+        try FileManager.default.createDirectory(at: file.url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let snapshot = Snapshot.fixture(authored: [.fixture(1)])
+        try JSONEncoder().encode(snapshot).write(to: file.url)
+        #expect(file.load() == nil)
+
+        try Data(#"{"version": 1, "snapshot": {}}"#.utf8).write(to: file.url)
+        #expect(file.load() == nil)
+    }
 }
